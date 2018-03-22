@@ -60,7 +60,7 @@
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
-		<property name="mapperLocations" value="classpath:com/inschos/cloud/account/mapper/*.xml" />
+		<property name="mapperLocations" value="classpath:com/inschos/cloud/account/data/mapper/*.xml" />
 		<property name="typeAliasesPackage" value="com.inschos.cloud.account.model"></property>
 	</bean>
 
@@ -70,7 +70,7 @@
 
 	<!-- mybatis 自动扫描.mapper文件 : MapperScannerConfigurer -->
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.inschos.cloud.account.dao" />
+		<property name="basePackage" value="com.inschos.cloud.account.data.mapper" />
 		<property name="sqlSessionTemplateBeanName" value="sqlSession" />
 	</bean>
 
@@ -94,7 +94,7 @@
 	<!-- 定义AOP配置 -->
 	<aop:config>
 		<!-- 定义一个切入点 -->
-		<aop:pointcut expression="execution (* com.inschos.cloud.account.service.impl.*.*(..))"
+		<aop:pointcut expression="execution (* com.inschos.cloud.account.data.dao.*.*(..))"
 			id="services" />
 		<!-- 对切入点和事务的通知，进行适配 -->
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="services" />

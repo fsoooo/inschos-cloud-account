@@ -1,4 +1,4 @@
-package com.inschos.cloud.account.controller.filter;
+package com.inschos.cloud.account.access.http.controller.filter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;

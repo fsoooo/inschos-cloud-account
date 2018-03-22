@@ -1,11 +1,12 @@
-package com.inschos.cloud.account.controller.action;
+package com.inschos.cloud.account.access.http.controller.action;
 
-import com.inschos.cloud.trading.annotation.ParamCheckAnnotation;
-import com.inschos.cloud.trading.assist.kit.JsonKit;
-import com.inschos.cloud.trading.assist.kit.StringKit;
-import com.inschos.cloud.trading.controller.bean.BaseResponse;
-import com.inschos.cloud.trading.controller.bean.PageBean;
-import com.inschos.cloud.trading.model.Page;
+
+import com.inschos.cloud.account.access.http.controller.bean.BaseResponse;
+import com.inschos.cloud.account.access.http.controller.bean.PageBean;
+import com.inschos.cloud.account.annotation.ParamCheckAnnotation;
+import com.inschos.cloud.account.assist.kit.JsonKit;
+import com.inschos.cloud.account.assist.kit.StringKit;
+import com.inschos.cloud.account.model.Page;
 
 import java.lang.reflect.Field;
 import java.util.List;

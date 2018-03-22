@@ -1,4 +1,4 @@
-package com.inschos.cloud.account.controller.bean;
+package com.inschos.cloud.account.access.http.controller.bean;
 
 public class PageBean {
     public String lastId;

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inschos.cloud.account.data.mapper.AccountMapper">
+
+    <sql id="Base_Column_List">
+        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`code`,`code_time`,`created_at`,`updated_at`,`state`
+    </sql>
+
+    <insert id="insert" parameterType="com.inschos.cloud.trading.model.Area">
+        insert into account(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`code`,`code_time`,`created_at`,`updated_at`,`state`)
+        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{code},#{code_time},#{created_at},#{updated_at},#{state})
+    </insert>
+
+    <update id="update" parameterType="com.inschos.cloud.account.model.Account">
+        update account set
+          `account_uuid`=#{account_uuid},`username`=#{username},`password`=#{password},`phone`=#{phone},`email`=#{email},`token`=#{token},`status`=#{status},`type`=#{type},
+          `user_id`=#{user_id},`code`=#{code},`code_time`=#{code_time},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state}
+        where `id`=#{id}
+    </update>
+
+    <select id="findOne" parameterType="int" resultType="com.inschos.cloud.account.model.Account">
+        select
+        <include refid="Base_Column_List"/>
+        from account
+        where  `id`=#{id}
+    </select>
+
+</mapper>
