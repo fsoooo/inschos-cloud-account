@@ -1,8 +1,10 @@
 package com.inschos.cloud.account.access.http.controller.bean;
 
+import java.util.Map;
+
 public class BaseResponse {
 	public int code;
-	public String message = "";
+	public Map<String,Object> message ;
 
 	public Object data;
 	public PageBean page;

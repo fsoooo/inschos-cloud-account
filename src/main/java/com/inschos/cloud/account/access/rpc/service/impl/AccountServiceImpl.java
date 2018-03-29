@@ -1,8 +1,12 @@
 package com.inschos.cloud.account.access.rpc.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.rpc.service.AccountService;
 import com.inschos.cloud.account.assist.kit.L;
+import com.inschos.cloud.account.data.dao.AccountDao;
+import com.inschos.cloud.account.model.Account;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by IceAnt on 2018/3/21.
@@ -10,10 +14,21 @@ import com.inschos.cloud.account.assist.kit.L;
 @Service
 public class AccountServiceImpl implements AccountService{
 
+    @Autowired
+    private AccountDao accountDao;
+
     @Override
-    public boolean isLogin(String token) {
-        L.log.debug("token is : "+token);
-        return true;
+    public Account getAccount(String token) {
+        L.log.debug("verifyToken is : "+token);
+        ActionBean actionBean = ActionBean.parseToken(token);
+        Account resultAccount = null;
+        if(actionBean!=null){
+            Account account = accountDao.findByUuid(actionBean.accountUuid);
+            if(token!=null && account!=null && token.equals(account.token)){
+                resultAccount = account;
+            }
+        }
+        return resultAccount;
     }
 
 }

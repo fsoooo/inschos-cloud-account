@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inschos.cloud.account.data.mapper.AccountVerifyMapper">
+
+    <sql id="Base_Column_List">
+        `id`,`account_uuid`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`
+    </sql>
+
+    <insert id="insert" parameterType="AccountVerifyMapper">
+        insert into account_verify(`id`,`account_uuid`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`)
+        values(#{id},#{account_uuid},#{from_type},#{verify_name},#{verify_type},#{code},#{code_time},#{status},#{created_at},#{updated_at})
+    </insert>
+
+    <update id="update" parameterType="AccountVerifyMapper">
+        update account_verify set
+          `account_uuid`=#{account_uuid},`from_type`=#{from_type},`verify_name`=#{verify_name},`verify_type`=#{verify_type},`code`=#{code},`code_time`=#{code_time},
+          `status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at}
+        where `id`=#{id}
+    </update>
+
+    <select id="findOne" parameterType="int" resultType="AccountVerifyMapper">
+        select
+        <include refid="Base_Column_List"/>
+        from account_verify
+        where `id`=#{id}
+    </select>
+
+    <select id="findLatestByFromVerify" parameterType="AccountVerifyMapper" resultType="AccountVerifyMapper">
+        select
+          <include refid="Base_Column_List"/>
+        from account_verify
+        where `verify_name`=#{verify_name} and `from_type`=#{from_type}
+        order by id desc
+        limit 1
+    </select>
+
+    <select id="findLatestByUuidFromVerify" parameterType="AccountVerifyMapper" resultType="AccountVerifyMapper">
+        select
+        <include refid="Base_Column_List"/>
+        from account_verify
+        where `verify_name`=#{verify_name} and `from_type`=#{from_type} and account_uuid=#{account_uuid}
+        order by id desc
+        limit 1
+    </select>
+
+
+
+
+</mapper>

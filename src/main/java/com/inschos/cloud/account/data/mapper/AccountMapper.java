@@ -9,8 +9,24 @@ public interface AccountMapper {
 
     int insert(Account account);
 
+    int insertRegistry(Account account);
+
     int update(Account account);
 
+    int updatePasswordByUuid(Account account);
+
+    int updatePasswordTokenByUuid(Account account);
+
+    int updateTokenByUuid(Account account);
+
+    int updatePhoneByUuid(Account account);
+
+    int updateEmailByUuid(Account account);
+
     Account findOne(Account id);
+
+    public Account findByAccount(Account search);
+
+    public Account findByUuid(String accountUuid);
 
 }

@@ -3,26 +3,107 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.AccountMapper">
 
     <sql id="Base_Column_List">
-        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`code`,`code_time`,`created_at`,`updated_at`,`state`
+        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`
     </sql>
 
-    <insert id="insert" parameterType="com.inschos.cloud.trading.model.Area">
-        insert into account(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`code`,`code_time`,`created_at`,`updated_at`,`state`)
-        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{code},#{code_time},#{created_at},#{updated_at},#{state})
+    <insert id="insert" parameterType="com.inschos.cloud.account.model.Account">
+        insert into `account`(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`)
+        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{created_at},#{updated_at},#{state},#{salt})
+    </insert>
+
+    <insert id="insertRegistry" parameterType="com.inschos.cloud.account.model.Account">
+        insert into account(`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`)
+        select #{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{created_at},#{updated_at},#{state},#{salt}
+        from dual where not exists (select id from `account`
+          <where>(`username`=#{username}
+              <choose>
+                  <when test="type==1">
+                      or `phone`=#{phone}
+                  </when>
+                  <when test="type==2">
+                      or `email`=#{email}
+                  </when>
+              </choose>
+              )
+              and `type`=#{type}
+          </where>
+        )
     </insert>
 
     <update id="update" parameterType="com.inschos.cloud.account.model.Account">
         update account set
           `account_uuid`=#{account_uuid},`username`=#{username},`password`=#{password},`phone`=#{phone},`email`=#{email},`token`=#{token},`status`=#{status},`type`=#{type},
-          `user_id`=#{user_id},`code`=#{code},`code_time`=#{code_time},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state}
+          `user_id`=#{user_id},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state},`salt`=#{salt}
         where `id`=#{id}
+    </update>
+
+    <update id="updatePasswordByUuid" parameterType="Account">
+        update account set
+          `password`=#{password},`updated_at`=#{updated_at},`salt`=#{salt}
+        where `account_uuid`=#{account_uuid}
+    </update>
+
+    <update id="updatePasswordTokenByUuid" parameterType="Account">
+        update account set
+        `password`=#{password},`updated_at`=#{updated_at},`salt`=#{salt},`token`=#{token}
+        where `account_uuid`=#{account_uuid}
+    </update>
+
+    <update id="updateTokenByUuid" parameterType="Account">
+        update account set
+        `token`=#{token},`updated_at`=#{updated_at}
+        where `account_uuid`=#{account_uuid}
+    </update>
+
+    <update id="updatePhoneByUuid" parameterType="Account">
+        update account set
+        `phone`=#{phone},`updated_at`=#{updated_at}
+        where `account_uuid`=#{account_uuid}
+    </update>
+
+    <update id="updateEmailByUuid" parameterType="Account">
+        update account set
+        `email`=#{email},`updated_at`=#{updated_at}
+        where `account_uuid`=#{account_uuid}
     </update>
 
     <select id="findOne" parameterType="int" resultType="com.inschos.cloud.account.model.Account">
         select
-        <include refid="Base_Column_List"/>
+          <include refid="Base_Column_List"/>
         from account
         where  `id`=#{id}
+    </select>
+
+    <select id="findAccount" parameterType="Account" resultType="Account">
+        select
+          <include refid="Base_Column_List"/>
+        from account
+        <where>
+            <choose>
+                <when test="searchAccountFiled==1">
+                    `username`=#{username}
+                </when>
+                <when test="searchAccountFiled==2">
+                    `phone`=#{phone}
+                </when>
+                <when test="searchAccountFiled==3">
+                    `email`=#{email}
+                </when>
+                <otherwise>1!=1</otherwise>
+            </choose>
+            and `type` = #{type}
+            and state=1
+            limit 1
+        </where>
+    </select>
+
+    <select id="findByUuid" parameterType="java.lang.String" resultType="Account">
+        select
+        <include refid="Base_Column_List"/>
+        from account
+        <where>
+            account_uuid = #{account_uuid}
+        </where>
     </select>
 
 </mapper>

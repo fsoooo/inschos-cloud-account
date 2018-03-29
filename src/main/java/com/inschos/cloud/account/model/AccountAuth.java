@@ -28,7 +28,7 @@ public class AccountAuth implements Serializable {
     /** 第三方账号ID*/
     public String auth_id;
 
-    /** token*/
+    /** verifyToken*/
     public String auth_access_token;
 
     /** 账号有效时间*/

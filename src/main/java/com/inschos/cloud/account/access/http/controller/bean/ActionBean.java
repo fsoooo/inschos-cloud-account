@@ -17,19 +17,21 @@ public class ActionBean {
 
 	public String platform;
 
-	public int apiCode;
+	public int apiCode=1;
 
-	public int companyId=1;
+	public String accountUuid;
 
-	public int userId = 1;
+	public int type;
 
-	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@token");
+	public long tokenTime;
 
-	public static String getSalt() {
+	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@verifyToken");
+
+	public static String getSalt(int accountType) {
 		if (ConstantKit.IS_PRODUCT) {
-			return SALT_VALUE_ONLINE;
+			return SALT_VALUE_ONLINE+MD5Kit.MD5Digest(String.valueOf(accountType));
 		} else {
-			return SALT_VALUE_TEST;
+			return SALT_VALUE_TEST+MD5Kit.MD5Digest(String.valueOf(accountType));
 		}
 	}
 
@@ -54,7 +56,7 @@ public class ActionBean {
 				}
 			}
 		} catch (Exception e) {
-			L.log.debug("token parse error:{}", e);
+			L.log.debug("verifyToken parse error:{}", e);
 		}
 		if (bean == null) {
 			bean = new ActionBean();

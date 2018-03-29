@@ -1,5 +1,8 @@
 package com.inschos.cloud.account.model;
 
+import com.inschos.cloud.account.assist.kit.MD5Kit;
+import com.inschos.cloud.account.assist.kit.StringKit;
+
 import java.io.Serializable;
 
 /**
@@ -21,6 +24,13 @@ public class Account implements Serializable{
     public static final int STATUS_NORMAL = 1;
 
     public static final int STATUS_ABNORMAL = 2;
+
+
+
+    public final static int ACCOUNT_FILED_USERNAME = 1;
+    public final static int ACCOUNT_FILED_PHONE = 2;
+    public final static int ACCOUNT_FILED_EMAIL = 3;
+
 
     /** */
     public long id;
@@ -50,13 +60,8 @@ public class Account implements Serializable{
     public int type;
 
     /** 用户ID*/
-    public long cust_id;
+    public String user_id;
 
-    /** 验证码*/
-    public String code;
-
-    /** 验证码有效时间*/
-    public long code_time;
 
     /** 创建时间*/
     public long created_at;
@@ -67,6 +72,43 @@ public class Account implements Serializable{
     /** 删除标识 0删除 1可用*/
     public int state;
 
+    /** 盐值 */
+    public String salt;
+
+    /**
+     * 搜索
+     * 1 username 2 phone 3 email
+     */
+    public int searchAccountFiled;
+
+
+    public static String generatePwd(String password,String salt){
+        String enpwd = "";
+        if(!StringKit.isEmpty(password)){
+
+            enpwd =  MD5Kit.MD5Digest("cloud"+password +salt + "@inschos-#:"+salt) ;
+        }
+        return enpwd;
+    }
+
+    public static int getAccountType(String requestAccountType){
+        int  accountType = 0;
+        switch (requestAccountType){
+            case "custuser":
+                accountType = TYPE_CUST_USER;
+                break;
+            case "custcom":
+                accountType = TYPE_CUST_COM;
+                break;
+            case "agent":
+                accountType = TYPE_AGENT;
+                break;
+            case "company":
+                accountType = TYPE_COMPANY;
+                break;
+        }
+        return accountType;
+    }
 
 
 }
