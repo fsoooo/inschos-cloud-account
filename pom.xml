@@ -199,6 +199,7 @@
   </profiles>
 
   <build>
+    <finalName>account</finalName>
     <defaultGoal>compile</defaultGoal>
     <plugins>
       <plugin>

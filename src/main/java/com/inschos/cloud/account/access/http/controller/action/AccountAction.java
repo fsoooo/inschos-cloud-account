@@ -300,7 +300,7 @@ public class AccountAction extends BaseAction {
         }
     }
 
-    public String sendCodeNoToken(ActionBean bean,String requestAccountType){
+    public String sendCode(ActionBean bean,String requestAccountType){
         GetCodeRequest request = requst2Bean(bean.body, GetCodeRequest.class);
         GetCodeResponse response = new GetCodeResponse();
         ResponseMessage errMessage = checkParam(request);

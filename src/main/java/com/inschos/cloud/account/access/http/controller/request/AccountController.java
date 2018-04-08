@@ -50,20 +50,13 @@ public class AccountController {
         return  accountAction.resetPassword(bean);
     }
 
+
     @GetActionBeanAnnotation(isCheckAccess = false)
-    @RequestMapping("/sendCodeNoToken")
-    @ResponseBody
-    public String sendCodeNoToken(ActionBean bean){
-        String method = StringKit.splitLast(bean.url, "/");
-        return  accountAction.sendCodeNoToken(bean,method);
-    }
-
-
-    @GetActionBeanAnnotation
     @RequestMapping("/sendCode")
     @ResponseBody
     public String sendCode(ActionBean bean){
-        return  accountAction.sendCode(bean);
+        String method = StringKit.splitLast(bean.url, "/");
+        return  accountAction.sendCode(bean,method);
     }
 
 

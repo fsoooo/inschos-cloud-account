@@ -34,7 +34,6 @@ public class AccountVerifyDao {
         AccountVerify search = new AccountVerify();
         search.verify_name = verifyName;
         search.from_type = fromAccountType;
-        search.account_uuid = accountUuid;
         return accountVerifyMapper.findLatestByUuidFromVerify(search);
     }
 
