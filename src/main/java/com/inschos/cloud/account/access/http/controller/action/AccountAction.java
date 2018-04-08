@@ -448,6 +448,11 @@ public class AccountAction extends BaseAction {
         }
     }
 
+    public String loginOut(ActionBean bean){
+        BaseResponse response = new BaseResponse();
+        return json(BaseResponse.CODE_SUCCESS,"成功退出", response);
+    }
+
     private String encodeVerifyToken(String name){
 
         RC4Kit rc4Kit = new RC4Kit("inschos-encry-verify-verifyToken");

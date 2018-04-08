@@ -164,7 +164,6 @@ public class BaseAction {
 
 					if(msgTxt!=null && name!=null){
 						message.add(name,msgTxt);
-						message.add(name,field.getType().getClass(),msgTxt);
 					}
 
 				} catch (IllegalArgumentException e) {
