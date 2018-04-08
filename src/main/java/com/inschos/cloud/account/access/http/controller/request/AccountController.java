@@ -19,7 +19,7 @@ public class AccountController {
     private AccountAction accountAction;
 
     @GetActionBeanAnnotation(isCheckAccess=false)
-    @RequestMapping("/login")
+    @RequestMapping("/login/*")
     @ResponseBody
     public String login(ActionBean bean){
         String method = StringKit.splitLast(bean.url, "/");
@@ -27,7 +27,7 @@ public class AccountController {
     }
 
     @GetActionBeanAnnotation(isCheckAccess=false)
-    @RequestMapping("/registry")
+    @RequestMapping("/registry/*")
     @ResponseBody
     public String registry(ActionBean bean){
         String method = StringKit.splitLast(bean.url, "/");
@@ -36,7 +36,7 @@ public class AccountController {
 
 
     @GetActionBeanAnnotation(isCheckAccess=false)
-    @RequestMapping("/forgetPwd")
+    @RequestMapping("/forgetPwd/*")
     @ResponseBody
     public String forgetPassword(ActionBean bean){
         String method = StringKit.splitLast(bean.url, "/");
@@ -52,7 +52,7 @@ public class AccountController {
 
 
     @GetActionBeanAnnotation(isCheckAccess = false)
-    @RequestMapping("/sendCode")
+    @RequestMapping("/sendCode/*")
     @ResponseBody
     public String sendCode(ActionBean bean){
         String method = StringKit.splitLast(bean.url, "/");
