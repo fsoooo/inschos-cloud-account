@@ -12,7 +12,7 @@ public class ResponseMessage {
 
     private final String DEFAULT_FIELD = "default";
 
-    public int code;
+    public int code = BaseResponse.CODE_SUCCESS;
 
     public void add(String content){
         resMessageKVList.add(new ResMessageKV(DEFAULT_FIELD, content));

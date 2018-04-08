@@ -1,6 +1,7 @@
 package com.inschos.cloud.account.exception;
 
 
+import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.assist.kit.L;
 import org.apache.log4j.DefaultThrowableRenderer;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -32,10 +33,11 @@ public class ExceptionHandler implements HandlerExceptionResolver {
 		ModelAndView modelAndView = new ModelAndView();
 		MappingJackson2JsonView view = new MappingJackson2JsonView();
 
-		Map<String, String> attributes = new HashMap<>();
+		Map<String, Object> attributes = new HashMap<>();
 		attributes.put("code", "500");
-		attributes.put("message", "服务器错误");
-
+		ResponseMessage message = new ResponseMessage();
+		message.add("服务器错误");
+		attributes.put("message", message.get());
 		view.setAttributesMap(attributes);
 		modelAndView.setView(view);
 

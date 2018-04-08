@@ -74,7 +74,7 @@
         where  `id`=#{id}
     </select>
 
-    <select id="findAccount" parameterType="Account" resultType="Account">
+    <select id="findByAccount" parameterType="Account" resultType="Account">
         select
           <include refid="Base_Column_List"/>
         from account

@@ -81,5 +81,13 @@ public class AccountController {
         return  accountAction.changeEmail(bean);
     }
 
+    @GetActionBeanAnnotation
+    @RequestMapping("/loginOut")
+    @ResponseBody
+    public String loginOut(ActionBean bean){
+        return  accountAction.loginOut(bean);
+    }
+
+
 
 }

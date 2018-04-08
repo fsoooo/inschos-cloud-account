@@ -162,8 +162,9 @@ public class BaseAction {
 						}
 					}
 
-					if(msgTxt!=null && name!=null){
-						message.add(name,msgTxt);
+					if(msgTxt!=null){
+						message.add(fieldName,name+msgTxt);
+						message.code = BaseResponse.CODE_FAILURE;
 					}
 
 				} catch (IllegalArgumentException e) {
