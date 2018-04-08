@@ -86,6 +86,7 @@ public class BaseAction {
 						if (field.isAnnotationPresent(ParamCheckAnnotation.class)) {
 							ParamCheckAnnotation annotation = field.getAnnotation(ParamCheckAnnotation.class);
 							name = annotation.name();
+
 							isCheckEmpty = annotation.isCheckEmpty();
 							isInteger = annotation.isInteger();
 							isCheckNumeric = annotation.isCheckNumeric();
@@ -163,6 +164,7 @@ public class BaseAction {
 
 					if(msgTxt!=null && name!=null){
 						message.add(name,msgTxt);
+						message.add(name,field.getType().getClass(),msgTxt);
 					}
 
 				} catch (IllegalArgumentException e) {

@@ -3,29 +3,29 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.AccountVerifyMapper">
 
     <sql id="Base_Column_List">
-        `id`,`account_uuid`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`
+        `id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`
     </sql>
 
-    <insert id="insert" parameterType="AccountVerifyMapper">
-        insert into account_verify(`id`,`account_uuid`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`)
-        values(#{id},#{account_uuid},#{from_type},#{verify_name},#{verify_type},#{code},#{code_time},#{status},#{created_at},#{updated_at})
+    <insert id="insert" parameterType="AccountVerify">
+        insert into account_verify(`id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`)
+        values(#{id},#{from_type},#{verify_name},#{verify_type},#{code},#{code_time},#{status},#{created_at},#{updated_at})
     </insert>
 
-    <update id="update" parameterType="AccountVerifyMapper">
+    <update id="update" parameterType="AccountVerify">
         update account_verify set
-          `account_uuid`=#{account_uuid},`from_type`=#{from_type},`verify_name`=#{verify_name},`verify_type`=#{verify_type},`code`=#{code},`code_time`=#{code_time},
+          `from_type`=#{from_type},`verify_name`=#{verify_name},`verify_type`=#{verify_type},`code`=#{code},`code_time`=#{code_time},
           `status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at}
         where `id`=#{id}
     </update>
 
-    <select id="findOne" parameterType="int" resultType="AccountVerifyMapper">
+    <select id="findOne" parameterType="int" resultType="AccountVerify">
         select
         <include refid="Base_Column_List"/>
         from account_verify
         where `id`=#{id}
     </select>
 
-    <select id="findLatestByFromVerify" parameterType="AccountVerifyMapper" resultType="AccountVerifyMapper">
+    <select id="findLatestByFromVerify" parameterType="AccountVerify" resultType="AccountVerify">
         select
           <include refid="Base_Column_List"/>
         from account_verify
@@ -34,11 +34,11 @@
         limit 1
     </select>
 
-    <select id="findLatestByUuidFromVerify" parameterType="AccountVerifyMapper" resultType="AccountVerifyMapper">
+    <select id="findLatestByUuidFromVerify" parameterType="AccountVerify" resultType="AccountVerify">
         select
         <include refid="Base_Column_List"/>
         from account_verify
-        where `verify_name`=#{verify_name} and `from_type`=#{from_type} and account_uuid=#{account_uuid}
+        where `verify_name`=#{verify_name} and `from_type`=#{from_type}
         order by id desc
         limit 1
     </select>

@@ -18,9 +18,9 @@
     <dubbo:protocol name="${registry.hessian.name}" port="${registry.hessian.port}" default="${registry.hessian.default}" />
 
 
-    <!--<dubbo:service interface="com.inschos.cloud.account.access.rpc.service.impl" ref="demoService" />-->
+    <dubbo:service interface="com.inschos.cloud.account.access.rpc.service.AccountService" ref="accountService" />
 
-    <dubbo:annotation package="com.inschos.cloud.account.access.rpc.service.impl"/>
+    <!--<dubbo:annotation package="com.inschos.cloud.account.access.rpc.service.impl"/>-->
 
 
 </beans>

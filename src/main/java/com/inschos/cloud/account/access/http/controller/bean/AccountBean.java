@@ -13,7 +13,7 @@ public class AccountBean {
         public String username;
 
         @ParamCheckAnnotation(name = "密码",isCheckEmpty = true,isCheckMinLength = 6,isCheckMaxLength = 20)
-        public String password;
+        public String password ;
 
     }
 
@@ -39,7 +39,7 @@ public class AccountBean {
         @ParamCheckAnnotation(name = "邮箱地址",isCheckEmpty = true,isCheckMinLength = 5,isCheckMaxLength = 64)
         public String email;
 
-        public String verifyToken;
+//        public String verifyToken;
     }
 
 
@@ -61,7 +61,7 @@ public class AccountBean {
 
     public static class GetCodeResponse extends BaseResponse{
 
-        public VerifyTokenData data;
+//        public VerifyTokenData data;
 
     }
 
@@ -90,7 +90,7 @@ public class AccountBean {
         @ParamCheckAnnotation(name = "验证码",isCheckEmpty = true)
         public String code;
 
-        public String verifyToken;
+//        public String verifyToken;
     }
 
 
@@ -109,7 +109,7 @@ public class AccountBean {
         @ParamCheckAnnotation(name = "邮件地址",isCheckEmpty = true,isCheckMinLength = 5,isCheckMaxLength = 64)
         public String email;
 
-        public String verifyToken;
+//        public String verifyToken;
 
     }
 
@@ -133,7 +133,7 @@ public class AccountBean {
         @ParamCheckAnnotation(name = "邮件地址",isCheckEmpty = true,isCheckMinLength = 5,isCheckMaxLength = 64)
         public String email;
 
-        public String verifyToken;
+//        public String verifyToken;
 
     }
 
@@ -142,12 +142,12 @@ public class AccountBean {
         public String token;
 
     }
-
-    public static class VerifyTokenData{
-
-        public String verifyToken;
-
-    }
+//
+//    public static class VerifyTokenData{
+//
+//        public String verifyToken;
+//
+//    }
 
     public static class RegistrySuccessData{
 

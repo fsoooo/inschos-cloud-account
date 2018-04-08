@@ -10,6 +10,7 @@ import com.inschos.cloud.account.assist.kit.StringKit;
 import com.inschos.cloud.account.assist.kit.TimeKit;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.data.dao.AccountVerifyDao;
+import com.inschos.cloud.account.extend.worker.AccountUuidWorker;
 import com.inschos.cloud.account.model.Account;
 import com.inschos.cloud.account.model.AccountVerify;
 import com.inschos.cloud.account.model.Common;
@@ -118,7 +119,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode(request.verifyToken, verifyNameInput, request.code, accountType,null);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,null);
 
         if(verifyFlag){
             String password = request.password.trim();
@@ -158,6 +159,8 @@ public class AccountAction extends BaseAction {
             int resultAdd = 0;
             if(!accountNameExsitFlag&&!StringKit.isEmpty(userId)){
                 Account addRecord = new Account();
+                // uuID
+                addRecord.account_uuid = String.valueOf(AccountUuidWorker.getWorker(1,1).nextId());
                 addRecord.status = Account.STATUS_NORMAL;
                 addRecord.password = Account.generatePwd(password,salt);
                 addRecord.username = request.username;
@@ -223,7 +226,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode(request.verifyToken, verifyNameInput, request.code, accountType,bean.accountUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
             Account updateRecord = new Account();
@@ -276,7 +279,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode(request.verifyToken, verifyNameInput, request.code, accountType,bean.accountUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
             Account updateRecord = new Account();
@@ -343,89 +346,13 @@ public class AccountAction extends BaseAction {
             if(ConstantKit.IS_PRODUCT){
                 // TODO: 2018/3/28  send code
             }
-            response.data = new VerifyTokenData();
-            response.data.verifyToken = encodeVerifyToken(verifyName);
             return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
         }else{
             return json(BaseResponse.CODE_SUCCESS,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
         }
     }
 
-    public String sendCode(ActionBean bean){
 
-        GetCodeRequest request = requst2Bean(bean.body, GetCodeRequest.class);
-        GetCodeResponse response = new GetCodeResponse();
-        ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
-        }
-        int accountType = bean.type;
-
-        String method = request.method;
-        boolean flag = false;
-        String errMsg = null;
-        AccountVerify accountVerify = null;
-        int verifyType = 0;
-        String verifyName = null;
-        if("sms".equals(method)){
-            flag = StringKit.isMobileNO(request.phone);
-            if(flag){
-                verifyName = request.phone;
-                verifyType = AccountVerify.VERIFY_TYPE_PHONE;
-            }else{
-                errMsg = "请输入正确的手机号";
-            }
-        }else if("mail".equals(method)){
-            flag = StringKit.isEmail(request.email);
-            if(flag){
-                verifyName = request.email;
-                verifyType = AccountVerify.VERIFY_TYPE_EMAIL;
-            }else{
-                errMsg = "请输入正确的邮箱地址";
-            }
-        }
-
-        if(flag){
-
-            //登录后 验证码处理
-            Account account = accountDao.findByUuid(bean.accountUuid);
-            flag = false;
-            if(account!=null){
-                if("sms".equals(method)){
-                    if(!verifyName.equals(account.phone)){
-                        errMsg = "请使用绑定的手机号";
-                    }else{
-                        flag = true;
-                    }
-                }else{
-                    if(!verifyName.equals(account.email)){
-                        errMsg = "请使用绑定的邮箱地址";
-                    }else{
-                        flag = true;
-                    }
-                }
-            }
-
-            if(flag){
-                errMsg = _toSendCode(verifyName, accountType, verifyType, bean.accountUuid);
-                if(errMsg==null){
-                    flag = true;
-                }
-            }
-
-        }
-
-        if(flag){
-            if(ConstantKit.IS_PRODUCT){
-                // TODO: 2018/3/28  send code
-            }
-            response.data = new VerifyTokenData();
-            response.data.verifyToken = encodeVerifyToken(verifyName);
-            return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
-        }else{
-            return json(BaseResponse.CODE_SUCCESS,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
-        }
-    }
 
     public String modifyPassword(ActionBean bean){
         ModifyPasswordRequest request = requst2Bean(bean.body, ModifyPasswordRequest.class);
@@ -468,7 +395,7 @@ public class AccountAction extends BaseAction {
         if(errMessage.hasError()){
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
-        boolean verifyFlag = _checkCode(request.verifyToken, request.phone,request.code, bean.type, bean.accountUuid);
+        boolean verifyFlag = _checkCode( request.phone,request.code, bean.type, bean.accountUuid);
         if(verifyFlag){
             Account account = accountDao.findByAccount(request.phone,bean.type,Account.ACCOUNT_FILED_PHONE);
 
@@ -500,7 +427,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
 
-        boolean verifyFlag = _checkCode(request.verifyToken, request.email,request.code, bean.type, bean.accountUuid);
+        boolean verifyFlag = _checkCode( request.email,request.code, bean.type, bean.accountUuid);
         if(verifyFlag){
             Account account = accountDao.findByAccount(request.email,bean.type,Account.ACCOUNT_FILED_EMAIL);
 
@@ -602,7 +529,6 @@ public class AccountAction extends BaseAction {
                 code = "666666";
             }
             AccountVerify addRecord = new AccountVerify();
-            addRecord.account_uuid = accountUuid;
             addRecord.from_type=accountType;
             addRecord.verify_name = verifyName;
             addRecord.verify_type = verifyType;
@@ -621,10 +547,9 @@ public class AccountAction extends BaseAction {
 
     }
 
-    private boolean _checkCode(String verifyToken,String verifyName,String code,int accountType,String accountUuid){
-        String verifyNameParse = decodeVerifyToken(verifyToken);
+    private boolean _checkCode(String verifyName,String code,int accountType,String accountUuid){
         boolean verifyFlag = false;
-        if(verifyNameParse!=null && verifyNameParse.equals(verifyName)) {
+        if(!StringKit.isEmpty(verifyName)) {
             long currentTime = TimeKit.currentTimeMillis();
             AccountVerify verify ;
             if(accountUuid==null){
