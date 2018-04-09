@@ -11,6 +11,10 @@ public interface AccountVerifyMapper {
 
     int update(AccountVerify record);
 
+    int updateCodeTime(AccountVerify updateRecord);
+
+    int updateStatus(AccountVerify updateRecord);
+
     AccountVerify findOne(AccountVerify accountVerify);
 
     AccountVerify findLatestByFromVerify(AccountVerify accountVerify);

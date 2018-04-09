@@ -282,9 +282,22 @@ public class AccountAction extends BaseAction {
         boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
+            if(accountType == Account.TYPE_CUST_USER){
+
+            }
+            Account account;
+            if(accountType==Account.TYPE_CUST_USER){
+                account = accountDao.findByAccount(verifyNameInput, accountType, Account.ACCOUNT_FILED_PHONE);
+            }else{
+                account = accountDao.findByAccount(verifyNameInput, accountType, Account.ACCOUNT_FILED_EMAIL);
+            }
+            if(account==null){
+
+                return json(BaseResponse.CODE_FAILURE,"手机号未注册", response);
+            }
             Account updateRecord = new Account();
             String salt = StringKit.randStr(6);
-            updateRecord.account_uuid=bean.accountUuid;
+            updateRecord.account_uuid=account.account_uuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
             String token = getLoginToken(bean.accountUuid, accountType);
@@ -556,16 +569,19 @@ public class AccountAction extends BaseAction {
         boolean verifyFlag = false;
         if(!StringKit.isEmpty(verifyName)) {
             long currentTime = TimeKit.currentTimeMillis();
-            AccountVerify verify ;
-            if(accountUuid==null){
-                verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType);
-            }else{
-                verify = accountVerifyDao.findLatestByUuidFromVerify(verifyName, accountType,accountUuid);
+            AccountVerify verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType);
+
+            if (verify != null && verify.status == AccountVerify.STATUS_NOT_USE && currentTime < verify.code_time) {
+                verifyFlag = verify.code.equals(code);
+                if(verifyFlag){
+                    AccountVerify updateUsed = new AccountVerify();
+                    updateUsed.updated_at = currentTime;
+                    updateUsed.status = AccountVerify.STATUS_USED;
+                    updateUsed.id= verify.id;
+                    accountVerifyDao.updateStatus(updateUsed);
+                }
             }
 
-            if (verify != null && verify.status == AccountVerify.STATUS_NOT_USE && verify.code_time < currentTime) {
-                verifyFlag = verify.code.equals(code);
-            }
         }
         return verifyFlag;
     }

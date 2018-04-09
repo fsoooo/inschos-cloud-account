@@ -18,6 +18,18 @@
         where `id`=#{id}
     </update>
 
+    <update id="updateCodeTime" parameterType="AccountVerify">
+        update account_verify set
+          `code`=#{code},`code_time`=#{code_time},`updated_at`=#{updated_at}
+        where `id`=#{id}
+    </update>
+
+    <update id="updateStatus" parameterType="AccountVerify">
+        update account_verify set
+        `status`=#{status},`updated_at`=#{updated_at}
+        where `id`=#{id}
+    </update>
+
     <select id="findOne" parameterType="int" resultType="AccountVerify">
         select
         <include refid="Base_Column_List"/>
@@ -28,15 +40,6 @@
     <select id="findLatestByFromVerify" parameterType="AccountVerify" resultType="AccountVerify">
         select
           <include refid="Base_Column_List"/>
-        from account_verify
-        where `verify_name`=#{verify_name} and `from_type`=#{from_type}
-        order by id desc
-        limit 1
-    </select>
-
-    <select id="findLatestByUuidFromVerify" parameterType="AccountVerify" resultType="AccountVerify">
-        select
-        <include refid="Base_Column_List"/>
         from account_verify
         where `verify_name`=#{verify_name} and `from_type`=#{from_type}
         order by id desc

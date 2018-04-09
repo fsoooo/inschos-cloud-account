@@ -38,6 +38,10 @@ public class AccountVerifyDao {
     }
 
     public int updateCodeTime(AccountVerify updateRecord){
-        return 0;
+        return updateRecord!=null?accountVerifyMapper.updateCodeTime(updateRecord):0;
     }
+    public int updateStatus(AccountVerify updateRecord){
+        return updateRecord!=null?accountVerifyMapper.updateStatus(updateRecord):0;
+    }
+
 }
