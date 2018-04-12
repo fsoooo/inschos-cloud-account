@@ -19,7 +19,5 @@ public interface AccountVerifyMapper {
 
     AccountVerify findLatestByFromVerify(AccountVerify accountVerify);
 
-    AccountVerify findLatestByUuidFromVerify(AccountVerify accountVerify);
-
 
 }

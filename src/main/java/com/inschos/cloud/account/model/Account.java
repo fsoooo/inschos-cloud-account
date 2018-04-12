@@ -56,6 +56,9 @@ public class Account implements Serializable{
     /** 1：正常，2，异常*/
     public int status;
 
+    /** 渠道系统ID */
+    public long sys_id;
+
     /** 1：个人账号，2：企业账号，3：业管账号，4：代理人*/
     public int type;
 

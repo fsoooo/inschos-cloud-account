@@ -227,4 +227,13 @@ public class StringKit {
 	public static boolean isHttpUrl(String url) {
 		return !StringKit.isEmpty(url) && (url.startsWith("http://") || url.startsWith("https://"));
 	}
+
+	public static String[] parseDomain(String url){
+		if (!StringKit.isEmpty(url)){
+			String reUrl = url.replaceFirst("^((http://)|(https://))", "");
+			String[] split = reUrl.split("/");
+			return split[0].split(":")[0].split("\\.");
+		}
+		return null;
+	}
 }

@@ -30,13 +30,6 @@ public class AccountVerifyDao {
         return accountVerifyMapper.findLatestByFromVerify(search);
     }
 
-    public AccountVerify findLatestByUuidFromVerify(String verifyName,int fromAccountType,String accountUuid){
-        AccountVerify search = new AccountVerify();
-        search.verify_name = verifyName;
-        search.from_type = fromAccountType;
-        return accountVerifyMapper.findLatestByUuidFromVerify(search);
-    }
-
     public int updateCodeTime(AccountVerify updateRecord){
         return updateRecord!=null?accountVerifyMapper.updateCodeTime(updateRecord):0;
     }

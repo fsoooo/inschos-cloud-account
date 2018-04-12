@@ -23,10 +23,11 @@ public class AccountDao {
      * @param searchAccountFiled  检索对应账号字段  1 username 2 phone 3 email
      * @return
      */
-    public Account findByAccount(String  accountName,int accountType,int searchAccountFiled){
+    public Account findByAccount(long sysId,String  accountName,int accountType,int searchAccountFiled){
         Account search = new Account();
         search.searchAccountFiled = searchAccountFiled;
         search.type = accountType;
+        search.sys_id = sysId;
         switch (searchAccountFiled){
             case Account.ACCOUNT_FILED_USERNAME:
                 search.username = accountName;
@@ -40,6 +41,10 @@ public class AccountDao {
         }
         return accountMapper.findByAccount(search);
 
+    }
+
+    public Account findOneChannelSystem(Account search){
+        return search!=null?accountMapper.findOneChannelSystem(search):null;
     }
 
     public int registry(Account account){

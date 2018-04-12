@@ -1,6 +1,7 @@
 package com.inschos.cloud.account.access.rpc.service.impl;
 
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
+import com.inschos.cloud.account.access.rpc.bean.AccountBean;
 import com.inschos.cloud.account.access.rpc.service.AccountService;
 import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.data.dao.AccountDao;
@@ -17,17 +18,24 @@ public class AccountServiceImpl implements AccountService{
     private AccountDao accountDao;
 
     @Override
-    public Account getAccount(String token) {
+    public AccountBean getAccount(String token) {
         L.log.debug("verifyToken is : "+token);
         ActionBean actionBean = ActionBean.parseToken(token);
-        Account resultAccount = new Account();
+        AccountBean accountBean = null;
         if(actionBean!=null){
-            Account account = accountDao.findByUuid(actionBean.accountUuid);
+            Account account = accountDao.findByUuid(actionBean.loginUuid);
             if(token!=null && account!=null && token.equals(account.token)){
-                resultAccount = account;
+                accountBean = new AccountBean();
+                accountBean.accountUuid = actionBean.belongAccountUuid;
+                accountBean.loginUuid = actionBean.loginUuid;
+                accountBean.userId = account.user_id;
+                accountBean.userType = account.type;
+                accountBean.username = account.username;
+                accountBean.phone = account.phone;
+                accountBean.email = account.email;
             }
         }
-        return resultAccount;
+        return accountBean;
     }
 
 }

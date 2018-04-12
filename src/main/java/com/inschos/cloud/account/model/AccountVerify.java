@@ -14,6 +14,8 @@ public class AccountVerify {
     /** */
     public long id;
 
+    public String account_uuid;
+
     /** 系统类型*/
     public int from_type;
 

@@ -34,6 +34,8 @@ public class HttpAopDefine {
 			String buildCode = request.getParameter(BaseRequest.FILEID_BUILDCODE);
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
+			String referer = request.getHeader("referer");
+// TODO: 2018/4/11   header  没有 referer
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
@@ -64,6 +66,7 @@ public class HttpAopDefine {
 			}
 			bean.platform = platform;
 			bean.url = request.getRequestURL().toString();
+			bean.referer = referer;
 
 			bean.body = HttpKit.readRequestBody(request);
 			if (StringKit.isEmpty(bean.body)) {

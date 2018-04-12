@@ -19,11 +19,17 @@ public class ActionBean {
 
 	public int apiCode=1;
 
-	public String accountUuid;
+	public String loginUuid;
+
+	public String belongAccountUuid;
+
+	public long sysId;
 
 	public int type;
 
 	public long tokenTime;
+
+	public String referer;
 
 	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@verifyToken");
 
