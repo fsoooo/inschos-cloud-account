@@ -7,11 +7,12 @@ import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by IceAnt on 2018/3/21.
  */
-@org.springframework.stereotype.Service("accountService")
+@Service
 public class AccountServiceImpl implements AccountService{
 
     @Autowired
@@ -23,11 +24,11 @@ public class AccountServiceImpl implements AccountService{
         ActionBean actionBean = ActionBean.parseToken(token);
         AccountBean accountBean = null;
         if(actionBean!=null){
-            Account account = accountDao.findByUuid(actionBean.loginUuid);
+            Account account = accountDao.findByUuid(actionBean.accountUuid);
             if(token!=null && account!=null && token.equals(account.token)){
                 accountBean = new AccountBean();
-                accountBean.accountUuid = actionBean.belongAccountUuid;
-                accountBean.loginUuid = actionBean.loginUuid;
+                accountBean.managerUuid = actionBean.managerUuid;
+                accountBean.accountUuid = actionBean.accountUuid;
                 accountBean.userId = account.user_id;
                 accountBean.userType = account.type;
                 accountBean.username = account.username;

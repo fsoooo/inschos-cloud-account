@@ -260,15 +260,15 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.loginUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
             Account updateRecord = new Account();
             String salt = StringKit.randStr(6);
-            updateRecord.account_uuid=bean.loginUuid;
+            updateRecord.account_uuid=bean.accountUuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.loginUuid, accountType,bean.belongAccountUuid,bean.sysId);
+            String token = getLoginToken(bean.accountUuid, accountType,bean.managerUuid,bean.sysId);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -326,7 +326,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.loginUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
             if(accountType == Account.TYPE_CUST_USER){
@@ -347,7 +347,7 @@ public class AccountAction extends BaseAction {
             updateRecord.account_uuid=account.account_uuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.loginUuid, accountType,accountSystem.account_uuid,system.id);
+            String token = getLoginToken(bean.accountUuid, accountType,accountSystem.account_uuid,system.id);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -433,7 +433,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
         int accountType = bean.type;
-        Account account = accountDao.findByUuid(bean.loginUuid);
+        Account account = accountDao.findByUuid(bean.accountUuid);
         if(account!=null && account.password.equals(Account.generatePwd(request.oldpsword,account.salt))){
 
             String salt = StringKit.randStr(6);
@@ -442,7 +442,7 @@ public class AccountAction extends BaseAction {
             updateRecord.password = Account.generatePwd(request.password,salt);
             updateRecord.account_uuid = account.account_uuid;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
-            String token = getLoginToken(account.account_uuid, accountType,bean.belongAccountUuid,bean.sysId);
+            String token = getLoginToken(account.account_uuid, accountType,bean.managerUuid,bean.sysId);
             updateRecord.token = token;
 
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -466,19 +466,19 @@ public class AccountAction extends BaseAction {
         if(errMessage.hasError()){
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
-        boolean verifyFlag = _checkCode( request.phone,request.code, bean.type, bean.loginUuid);
+        boolean verifyFlag = _checkCode( request.phone,request.code, bean.type, bean.accountUuid);
 
         if(verifyFlag){
             Account account = accountDao.findByAccount(bean.sysId,request.phone,bean.type,Account.ACCOUNT_FILED_PHONE);
 
-            if(account!=null && !account.account_uuid.equals(bean.loginUuid)){
+            if(account!=null && !account.account_uuid.equals(bean.accountUuid)){
                 return json(BaseResponse.CODE_FAILURE,"手机号已被占用", response);
             }
 
             Account updateRecord = new Account();
             updateRecord.phone = request.phone;
             updateRecord.updated_at=TimeKit.currentTimeMillis();
-            updateRecord.account_uuid = bean.loginUuid;
+            updateRecord.account_uuid = bean.accountUuid;
             if(accountDao.updatePhoneByUuid(updateRecord)>0){
                 return json(BaseResponse.CODE_SUCCESS,"更换手机号成功", response);
             }else{
@@ -499,17 +499,17 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
 
-        boolean verifyFlag = _checkCode( request.email,request.code, bean.type, bean.loginUuid);
+        boolean verifyFlag = _checkCode( request.email,request.code, bean.type, bean.accountUuid);
         if(verifyFlag){
             Account account = accountDao.findByAccount(bean.sysId,request.email,bean.type,Account.ACCOUNT_FILED_EMAIL);
 
-            if(account!=null && !account.account_uuid.equals(bean.loginUuid)){
+            if(account!=null && !account.account_uuid.equals(bean.accountUuid)){
                 return json(BaseResponse.CODE_FAILURE,"邮箱地址已被占用", response);
             }
             Account updateRecord = new Account();
             updateRecord.email = request.email;
             updateRecord.updated_at=TimeKit.currentTimeMillis();
-            updateRecord.account_uuid = bean.loginUuid;
+            updateRecord.account_uuid = bean.accountUuid;
             if(accountDao.updateEmailByUuid(updateRecord)>0){
                 return json(BaseResponse.CODE_SUCCESS,"更换邮箱地址成功", response);
             }else{
@@ -528,8 +528,8 @@ public class AccountAction extends BaseAction {
 
     private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId){
         ActionBean loginAction = new ActionBean();
-        loginAction.loginUuid = uuid;
-        loginAction.belongAccountUuid = sysUuid;
+        loginAction.accountUuid = uuid;
+        loginAction.managerUuid = sysUuid;
         loginAction.tokenTime = TimeKit.currentTimeMillis();
         loginAction.salt = ActionBean.getSalt(accountType);
         loginAction.sysId = sysId;

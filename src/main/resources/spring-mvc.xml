@@ -51,4 +51,6 @@
 		</property>
 	</bean>
 
+	<import resource="spring-hprose.xml" />
+
 </beans>

@@ -19,9 +19,9 @@ public class ActionBean {
 
 	public int apiCode=1;
 
-	public String loginUuid;
+	public String accountUuid;
 
-	public String belongAccountUuid;
+	public String managerUuid;
 
 	public long sysId;
 
