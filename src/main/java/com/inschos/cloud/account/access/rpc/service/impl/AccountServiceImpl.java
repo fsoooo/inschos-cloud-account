@@ -20,12 +20,13 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public AccountBean getAccount(String token) {
+
         L.log.debug("verifyToken is : "+token);
         ActionBean actionBean = ActionBean.parseToken(token);
         AccountBean accountBean = null;
         if(actionBean!=null){
             Account account = accountDao.findByUuid(actionBean.accountUuid);
-            if(token!=null && account!=null && token.equals(account.token)){
+            if(token!=null && account!=null && account.salt!=null &&account.salt.equals(actionBean.salt)){
                 accountBean = new AccountBean();
                 accountBean.managerUuid = actionBean.managerUuid;
                 accountBean.accountUuid = actionBean.accountUuid;

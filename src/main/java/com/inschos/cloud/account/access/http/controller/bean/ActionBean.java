@@ -33,11 +33,11 @@ public class ActionBean {
 
 	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@verifyToken");
 
-	public static String getSalt(int accountType) {
+	public static String getSalt(String salt) {
 		if (ConstantKit.IS_PRODUCT) {
-			return SALT_VALUE_ONLINE+MD5Kit.MD5Digest(String.valueOf(accountType));
+			return SALT_VALUE_ONLINE+salt;
 		} else {
-			return SALT_VALUE_TEST+MD5Kit.MD5Digest(String.valueOf(accountType));
+			return SALT_VALUE_TEST+salt;
 		}
 	}
 
@@ -55,6 +55,7 @@ public class ActionBean {
 		ActionBean bean = null;
 		try {
 			if (!StringKit.isEmpty(token)) {
+//				token.replaceAll("\\+"," ");
 				String tokenString = rc4.decry_RC4_base64(token);
 
 				if (!StringKit.isEmpty(tokenString)) {

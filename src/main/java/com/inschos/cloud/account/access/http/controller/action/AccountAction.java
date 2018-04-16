@@ -79,14 +79,10 @@ public class AccountAction extends BaseAction {
         if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
             if(account.status==Account.STATUS_NORMAL){
                 String token = null;
-                if(StringKit.isEmpty(account.token)){
-                    long timeMillis = TimeKit.currentTimeMillis();
-                    account.token = getLoginToken(account.account_uuid,accountType,accountSystem.account_uuid,system.id);
-                    account.updated_at = timeMillis;
-                    if(accountDao.updateTokenByUuid(account)>0){
-                        token = account.token;
-                    }
-                }else{
+                long timeMillis = TimeKit.currentTimeMillis();
+                account.token = getLoginToken(account.account_uuid,accountType,accountSystem.account_uuid,system.id,account.salt);
+                account.updated_at = timeMillis;
+                if(accountDao.updateTokenByUuid(account)>0){
                     token = account.token;
                 }
 
@@ -268,7 +264,7 @@ public class AccountAction extends BaseAction {
             updateRecord.account_uuid=bean.accountUuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.accountUuid, accountType,bean.managerUuid,bean.sysId);
+            String token = getLoginToken(bean.accountUuid, accountType,bean.managerUuid,bean.sysId,salt);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -347,7 +343,7 @@ public class AccountAction extends BaseAction {
             updateRecord.account_uuid=account.account_uuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.accountUuid, accountType,accountSystem.account_uuid,system.id);
+            String token = getLoginToken(bean.accountUuid, accountType,accountSystem.account_uuid,system.id,salt);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -442,7 +438,7 @@ public class AccountAction extends BaseAction {
             updateRecord.password = Account.generatePwd(request.password,salt);
             updateRecord.account_uuid = account.account_uuid;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
-            String token = getLoginToken(account.account_uuid, accountType,bean.managerUuid,bean.sysId);
+            String token = getLoginToken(account.account_uuid, accountType,bean.managerUuid,bean.sysId,salt);
             updateRecord.token = token;
 
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -526,12 +522,12 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId){
+    private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId,String salt){
         ActionBean loginAction = new ActionBean();
         loginAction.accountUuid = uuid;
         loginAction.managerUuid = sysUuid;
         loginAction.tokenTime = TimeKit.currentTimeMillis();
-        loginAction.salt = ActionBean.getSalt(accountType);
+        loginAction.salt = ActionBean.getSalt(salt);
         loginAction.sysId = sysId;
         loginAction.type = accountType;
         return ActionBean.packageToken(loginAction);
