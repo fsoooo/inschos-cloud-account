@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.inschos.cloud.account.data.mapper.ChannelSystemMapper">
+<mapper namespace="com.inschos.cloud.account.data.mapper.PlatformSystemMapper">
 
     <sql id="Base_Column_List">
       `id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`
     </sql>
 
-    <insert id="insert" parameterType="ChannelSystem">
-        insert into channel_system(`id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`)
+    <insert id="insert" parameterType="PlatformSystem">
+        insert into platform_system(`id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`)
         values(
           #{id},#{name},#{domain},#{status},#{created_at},#{updated_at},#{state}
         )
     </insert>
 
-    <update id="update" parameterType="ChannelSystem">
-        update channel_system set
+    <update id="update" parameterType="PlatformSystem">
+        update platform_system set
           `name`=#{name},`domain`=#{domain},`status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state}
         where `id`=#{id}
     </update>
 
-    <select id="findOne" parameterType="int" resultType="ChannelSystem">
+    <select id="findOne" parameterType="int" resultType="PlatformSystem">
         select
         <include refid="Base_Column_List"/>
-        from  channel_system
+        from  platform_system
         where `id`=#{id}
     </select>
 
-    <select id="findDomain" parameterType="java.lang.String" resultType="ChannelSystem">
+    <select id="findDomain" parameterType="java.lang.String" resultType="PlatformSystem">
         select
         <include refid="Base_Column_List"/>
-        from  channel_system
+        from  platform_system
         where `domain`=#{domain} and `state`=1
     </select>
 

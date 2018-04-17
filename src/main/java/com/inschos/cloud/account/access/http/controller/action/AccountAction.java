@@ -9,11 +9,11 @@ import com.inschos.cloud.account.assist.kit.StringKit;
 import com.inschos.cloud.account.assist.kit.TimeKit;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.data.dao.AccountVerifyDao;
-import com.inschos.cloud.account.data.dao.ChannelSystemDao;
+import com.inschos.cloud.account.data.dao.PlatformSystemDao;
 import com.inschos.cloud.account.extend.worker.AccountUuidWorker;
 import com.inschos.cloud.account.model.Account;
 import com.inschos.cloud.account.model.AccountVerify;
-import com.inschos.cloud.account.model.ChannelSystem;
+import com.inschos.cloud.account.model.PlatformSystem;
 import com.inschos.cloud.account.model.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ public class AccountAction extends BaseAction {
     @Autowired
     private AccountVerifyDao accountVerifyDao;
     @Autowired
-    private ChannelSystemDao channelSystemDao;
+    private PlatformSystemDao platformSystemDao;
 
     private final long CODE_VALID_TIME = 10*60*1000L;
 
@@ -51,17 +51,11 @@ public class AccountAction extends BaseAction {
         }
         int accountType = Account.getAccountType(requestAccountType);
 
-        ChannelSystem system = _getChannelSystem(bean.referer);
-        if(system==null || system.status !=ChannelSystem.STATUS_OK){
+        PlatformSystem system = _getChannelSystem(bean.referer);
+        if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
-        Account searchSystem = new Account();
-        searchSystem.sys_id = system.id;
-        searchSystem.user_type = Account.TYPE_COMPANY;
-        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
-        if(accountSystem==null){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
-        }
+
 
         Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_USERNAME);
         switch (accountType){
@@ -77,10 +71,16 @@ public class AccountAction extends BaseAction {
                 break;
         }
         if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
+
+            String managerUuid = null;
+            if(accountType==Account.TYPE_COMPANY){
+                managerUuid = account.account_uuid;
+            }
+
             if(account.status==Account.STATUS_NORMAL){
                 String token = null;
                 long timeMillis = TimeKit.currentTimeMillis();
-                account.token = getLoginToken(account.account_uuid,accountType,accountSystem.account_uuid,system.id,account.salt);
+                account.token = getLoginToken(account.account_uuid,accountType,managerUuid,system.id,account.salt);
                 account.updated_at = timeMillis;
                 if(accountDao.updateTokenByUuid(account)>0){
                     token = account.token;
@@ -107,19 +107,10 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        ChannelSystem system = _getChannelSystem(bean.referer);
-        if(system==null || system.status !=ChannelSystem.STATUS_OK){
+        PlatformSystem system = _getChannelSystem(bean.referer);
+        if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
-        Account searchSystem = new Account();
-        searchSystem.sys_id = system.id;
-        searchSystem.user_type = Account.TYPE_COMPANY;
-        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
-        if(accountSystem==null){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
-        }
-
-
 
         List<String> ignore = new ArrayList<>();
         String errMsg = null;
@@ -285,17 +276,17 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        ChannelSystem system = _getChannelSystem(bean.referer);
-        if(system==null || system.status !=ChannelSystem.STATUS_OK){
+        PlatformSystem system = _getChannelSystem(bean.referer);
+        if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
-        Account searchSystem = new Account();
-        searchSystem.sys_id = system.id;
-        searchSystem.user_type = Account.TYPE_COMPANY;
-        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
-        if(accountSystem==null){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
-        }
+//        Account searchSystem = new Account();
+//        searchSystem.sys_id = system.id;
+//        searchSystem.user_type = Account.TYPE_COMPANY;
+//        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
+//        if(accountSystem==null){
+//            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+//        }
 
         List<String> ignore = new ArrayList<>();
         String errMsg = null;
@@ -325,9 +316,6 @@ public class AccountAction extends BaseAction {
         boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
 
         if (verifyFlag) {
-            if(accountType == Account.TYPE_CUST_USER){
-
-            }
             Account account;
             if(accountType==Account.TYPE_CUST_USER){
                 account = accountDao.findByAccount(system.id,verifyNameInput, accountType, Account.ACCOUNT_FILED_PHONE);
@@ -338,12 +326,16 @@ public class AccountAction extends BaseAction {
 
                 return json(BaseResponse.CODE_FAILURE,"手机号未注册", response);
             }
+            String managerUuid = null;
+            if(accountType==Account.TYPE_COMPANY){
+                managerUuid = account.account_uuid;
+            }
             Account updateRecord = new Account();
             String salt = StringKit.randStr(6);
             updateRecord.account_uuid=account.account_uuid;
             updateRecord.salt = salt;
             updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.accountUuid, accountType,accountSystem.account_uuid,system.id,salt);
+            String token = getLoginToken(bean.accountUuid, accountType,managerUuid,system.id,salt);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
             if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
@@ -366,17 +358,11 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        ChannelSystem system = _getChannelSystem(bean.referer);
-        if(system==null || system.status !=ChannelSystem.STATUS_OK){
+        PlatformSystem system = _getChannelSystem(bean.referer);
+        if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
-        Account searchSystem = new Account();
-        searchSystem.sys_id = system.id;
-        searchSystem.user_type = Account.TYPE_COMPANY;
-        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
-        if(accountSystem==null){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
-        }
+
 
         String method = request.method;
         boolean flag = false;
@@ -403,7 +389,7 @@ public class AccountAction extends BaseAction {
         }
 
         if(flag){
-            errMsg = _toSendCode(verifyName, accountType, verifyType, accountSystem.account_uuid);
+            errMsg = _toSendCode(verifyName, accountType, verifyType, system.id);
             if(errMsg==null){
                 flag = true;
             }
@@ -534,7 +520,7 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private String _toSendCode(String verifyName,int accountType,int verifyType,String accountUuid){
+    private String _toSendCode(String verifyName,int accountType,int verifyType,long sysId){
 
         AccountVerify accountVerify = accountVerifyDao.findLatestByFromVerify(verifyName,accountType);;
 
@@ -579,7 +565,7 @@ public class AccountAction extends BaseAction {
                 code = "666666";
             }
             AccountVerify addRecord = new AccountVerify();
-            addRecord.account_uuid = accountUuid;
+            addRecord.sys_id = sysId;
             addRecord.from_type=accountType;
             addRecord.verify_name = verifyName;
             addRecord.verify_type = verifyType;
@@ -619,12 +605,19 @@ public class AccountAction extends BaseAction {
         return verifyFlag;
     }
 
-    private ChannelSystem _getChannelSystem(String referer){
-        String[] domains = StringKit.parseDomain(referer);
-        if(domains!=null){
-            String domain = domains[0];
-            return  channelSystemDao.findDomain(domain);
+    private PlatformSystem _getChannelSystem(String referer){
+        if(ConstantKit.IS_PRODUCT){
+            String[] domains = StringKit.parseDomain(referer);
+            if(domains!=null){
+                String domain = domains[0];
+                return  platformSystemDao.findDomain(domain);
+            }
+        }else{
+            PlatformSystem system = new PlatformSystem();
+            system.id = 1;
+            return system;
         }
+
 
         return null;
     }

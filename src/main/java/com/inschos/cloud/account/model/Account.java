@@ -35,7 +35,7 @@ public class Account implements Serializable{
     /** */
     public long id;
 
-    /** account_uuid*/
+    /** sys_id*/
     public String account_uuid;
 
     /** 用户名*/

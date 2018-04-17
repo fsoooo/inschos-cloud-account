@@ -3,7 +3,7 @@ package com.inschos.cloud.account.model;
 /**
  * Created by IceAnt on 2018/4/11.
  */
-public class ChannelSystem {
+public class PlatformSystem {
 
     public final static int STATUS_NO = 0;
 
