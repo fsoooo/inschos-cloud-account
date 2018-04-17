@@ -42,8 +42,21 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
-    public Account findByUuid(String uuid) {
-        return StringKit.isEmpty(uuid)?null:accountDao.findByUuid(uuid);
+    public AccountBean findByUuid(String uuid) {
+        AccountBean bean = null;
+        if(!StringKit.isEmpty(uuid)){
+            Account account = accountDao.findByUuid(uuid);
+            if(account!=null){
+                bean = new AccountBean();
+                bean.userId = account.user_id;
+                bean.userType = account.user_type;
+                bean.username = account.username;
+                bean.phone = account.phone;
+                bean.email = account.email;
+                bean.accountUuid = uuid;
+            }
+        }
+        return bean;
     }
 
 }
