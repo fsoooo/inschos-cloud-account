@@ -57,7 +57,7 @@ public class AccountAction extends BaseAction {
         }
         Account searchSystem = new Account();
         searchSystem.sys_id = system.id;
-        searchSystem.type = Account.TYPE_COMPANY;
+        searchSystem.user_type = Account.TYPE_COMPANY;
         Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
         if(accountSystem==null){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
@@ -113,7 +113,7 @@ public class AccountAction extends BaseAction {
         }
         Account searchSystem = new Account();
         searchSystem.sys_id = system.id;
-        searchSystem.type = Account.TYPE_COMPANY;
+        searchSystem.user_type = Account.TYPE_COMPANY;
         Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
         if(accountSystem==null){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
@@ -193,7 +193,7 @@ public class AccountAction extends BaseAction {
                 addRecord.username = request.username;
                 addRecord.phone = request.phone;
                 addRecord.email = request.email;
-                addRecord.type = accountType;
+                addRecord.user_type = accountType;
                 addRecord.account_uuid = "";
                 addRecord.user_id = userId;
                 addRecord.salt = salt;
@@ -291,7 +291,7 @@ public class AccountAction extends BaseAction {
         }
         Account searchSystem = new Account();
         searchSystem.sys_id = system.id;
-        searchSystem.type = Account.TYPE_COMPANY;
+        searchSystem.user_type = Account.TYPE_COMPANY;
         Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
         if(accountSystem==null){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
@@ -372,7 +372,7 @@ public class AccountAction extends BaseAction {
         }
         Account searchSystem = new Account();
         searchSystem.sys_id = system.id;
-        searchSystem.type = Account.TYPE_COMPANY;
+        searchSystem.user_type = Account.TYPE_COMPANY;
         Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
         if(accountSystem==null){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);

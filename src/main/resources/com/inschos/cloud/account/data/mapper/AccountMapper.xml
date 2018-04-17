@@ -3,26 +3,26 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.AccountMapper">
 
     <sql id="Base_Column_List">
-        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`
+        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`
     </sql>
 
     <insert id="insert" parameterType="com.inschos.cloud.account.model.Account">
-        insert into `account`(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
-        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id})
+        insert into `account`(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
+        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id})
     </insert>
 
     <insert id="insertRegistry" parameterType="com.inschos.cloud.account.model.Account">
-        insert into account(`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
-        select #{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id}
+        insert into account(`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
+        select #{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id}
         from dual where not exists (select id from `account`
           <where>
-              `sys_id`=#{sys_id} and `type`=#{type} and
+              `sys_id`=#{sys_id} and `user_type`=#{user_type} and
               (`username`=#{username}
               <choose>
-                  <when test="type==1">
+                  <when test="user_type==1">
                       or `phone`=#{phone}
                   </when>
-                  <when test="type==2">
+                  <when test="user_type==2">
                       or `email`=#{email}
                   </when>
               </choose>
@@ -34,7 +34,7 @@
 
     <update id="update" parameterType="com.inschos.cloud.account.model.Account">
         update account set
-          `account_uuid`=#{account_uuid},`username`=#{username},`password`=#{password},`phone`=#{phone},`email`=#{email},`token`=#{token},`status`=#{status},`type`=#{type},
+          `account_uuid`=#{account_uuid},`username`=#{username},`password`=#{password},`phone`=#{phone},`email`=#{email},`token`=#{token},`status`=#{status},`user_type`=#{user_type},
           `user_id`=#{user_id},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state},`salt`=#{salt}
         where `id`=#{id}
     </update>
@@ -94,7 +94,7 @@
                 <otherwise>1!=1</otherwise>
             </choose>
             and `sys_id`=#{sys_id}
-            and `type` = #{type}
+            and `user_type` = #{user_type}
             and state=1
             limit 1
         </where>
@@ -114,7 +114,7 @@
         <include refid="Base_Column_List"/>
         from account
         <where>
-            `sys_id`=#{sys_id} and `type`=#{type} and state=1
+            `sys_id`=#{sys_id} and `user_type`=#{user_type} and state=1
             limit 1
         </where>
     </select>

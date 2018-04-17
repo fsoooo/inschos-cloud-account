@@ -4,6 +4,7 @@ import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.rpc.bean.AccountBean;
 import com.inschos.cloud.account.access.rpc.service.AccountService;
 import com.inschos.cloud.account.assist.kit.L;
+import com.inschos.cloud.account.assist.kit.StringKit;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +32,18 @@ public class AccountServiceImpl implements AccountService{
                 accountBean.managerUuid = actionBean.managerUuid;
                 accountBean.accountUuid = actionBean.accountUuid;
                 accountBean.userId = account.user_id;
-                accountBean.userType = account.type;
+                accountBean.userType = account.user_type;
                 accountBean.username = account.username;
                 accountBean.phone = account.phone;
                 accountBean.email = account.email;
             }
         }
         return accountBean;
+    }
+
+    @Override
+    public Account findByUuid(String uuid) {
+        return StringKit.isEmpty(uuid)?null:accountDao.findByUuid(uuid);
     }
 
 }

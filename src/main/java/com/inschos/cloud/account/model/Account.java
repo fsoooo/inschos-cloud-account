@@ -60,7 +60,7 @@ public class Account implements Serializable{
     public long sys_id;
 
     /** 1：个人账号，2：企业账号，3：业管账号，4：代理人*/
-    public int type;
+    public int user_type;
 
     /** 用户ID*/
     public String user_id;

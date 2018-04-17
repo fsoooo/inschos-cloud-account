@@ -1,6 +1,7 @@
 package com.inschos.cloud.account.access.rpc.service;
 
 import com.inschos.cloud.account.access.rpc.bean.AccountBean;
+import com.inschos.cloud.account.model.Account;
 
 /**
  * Created by IceAnt on 2018/3/21.
@@ -8,6 +9,9 @@ import com.inschos.cloud.account.access.rpc.bean.AccountBean;
 
 public interface AccountService {
 
+    /**通过token，获取账号信息*/
     public AccountBean getAccount(String token);
 
+    /** 通过账号uuid 获取账号信息*/
+    public Account findByUuid(String uuid);
 }

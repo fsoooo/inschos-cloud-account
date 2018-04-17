@@ -19,14 +19,14 @@ public class AccountDao {
     /**
      *
      * @param accountName  账号
-     * @param accountType 账号类型 type
+     * @param accountType 账号类型 user_type
      * @param searchAccountFiled  检索对应账号字段  1 username 2 phone 3 email
      * @return
      */
     public Account findByAccount(long sysId,String  accountName,int accountType,int searchAccountFiled){
         Account search = new Account();
         search.searchAccountFiled = searchAccountFiled;
-        search.type = accountType;
+        search.user_type = accountType;
         search.sys_id = sysId;
         switch (searchAccountFiled){
             case Account.ACCOUNT_FILED_USERNAME:
