@@ -615,6 +615,7 @@ public class AccountAction extends BaseAction {
         }else{
             PlatformSystem system = new PlatformSystem();
             system.id = 1;
+            system.status = PlatformSystem.STATUS_OK;
             return system;
         }
 
