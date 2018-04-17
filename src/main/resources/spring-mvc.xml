@@ -17,7 +17,12 @@
 	<mvc:annotation-driven >
 		<mvc:message-converters register-defaults="true">
 			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
-				<constructor-arg value="UTF-8" />
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html;charset=UTF-8</value>
+					</list>
+				</property>
+				<property name="writeAcceptCharset" value="false"/>
 			</bean>
 		</mvc:message-converters>
 	</mvc:annotation-driven>
@@ -40,25 +45,7 @@
 	<!--异常处理 -->
 	<bean id="exceptionResolver" class="com.inschos.cloud.account.exception.ExceptionHandler" />
 
-	<!-- @ResponseBody输出字符串时遇到的乱码解决办法 -->
-	<bean id="stringHttpMessageConverter"
-		class="org.springframework.http.converter.StringHttpMessageConverter">
-		<property name="writeAcceptCharset" value="false" />
-		<property name="supportedMediaTypes">
-			<list>
-				<value>text/html;charset=UTF-8</value>
-			</list>
-		</property>
-	</bean>
 
-	<bean
-		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<ref bean="stringHttpMessageConverter" />
-			</list>
-		</property>
-	</bean>
 
 	<import resource="spring-hprose.xml" />
 
