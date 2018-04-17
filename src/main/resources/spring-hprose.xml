@@ -20,7 +20,7 @@
 	</bean>
 
 	<bean name="accountService"
-		class="com.inschos.cloud.account.remoting.hprose.HproseHttpServiceExporter">
+		class="com.inschos.cloud.account.access.rpc.remoting.hprose.HproseHttpServiceExporter">
 		<property name="service" ref="accountServiceImpl" />
 		<property name="serviceInterface"
 			value="com.inschos.cloud.account.access.rpc.service.AccountService" />

@@ -1,4 +1,4 @@
-package com.inschos.cloud.account.remoting.hprose;
+package com.inschos.cloud.account.access.rpc.remoting.hprose;
 
 import hprose.client.HproseClient;
 import hprose.client.HproseHttpClient;

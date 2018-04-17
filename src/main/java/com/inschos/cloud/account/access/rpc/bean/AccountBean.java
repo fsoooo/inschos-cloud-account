@@ -5,7 +5,7 @@ package com.inschos.cloud.account.access.rpc.bean;
  */
 public class AccountBean {
 
-    /** 所属账号uuid*/
+    /** 所属业管uuid*/
     public String managerUuid;
 
     /** 登录账号uuid*/
