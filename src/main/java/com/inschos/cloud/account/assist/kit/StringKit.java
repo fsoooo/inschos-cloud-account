@@ -131,17 +131,33 @@ public class StringKit {
 		}
 		return builder.toString();
 	}
-
 	public static String join(Collection<?> collection, String separator) {
-		return join(collection, separator);
+		return collection == null?null:join(collection.iterator(), separator);
 	}
-
-
 
 	public static String join(Object[] array, String separator) {
-		return join(array, separator);
-	}
+		if(array == null) {
+			return null;
+		} else {
+			if(separator == null) {
+				separator = "";
+			}
 
+			StringBuffer buf = new StringBuffer();
+
+			for(int i = 0,len=array.length; i < len; ++i) {
+				if(i > 0) {
+					buf.append(separator);
+				}
+
+				if(array[i] != null) {
+					buf.append(array[i]);
+				}
+			}
+
+			return buf.toString();
+		}
+	}
 	public static String join(Iterator iterator, String separator) {
 
 		// handle null, zero and one elements before building a buffer

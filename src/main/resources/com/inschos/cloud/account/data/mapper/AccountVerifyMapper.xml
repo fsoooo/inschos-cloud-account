@@ -3,18 +3,18 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.AccountVerifyMapper">
 
     <sql id="Base_Column_List">
-        `id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`,`account_uuid`
+        `id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`,`sys_id`
     </sql>
 
     <insert id="insert" parameterType="AccountVerify">
-        insert into account_verify(`id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`,`account_uuid`)
-        values(#{id},#{from_type},#{verify_name},#{verify_type},#{code},#{code_time},#{status},#{created_at},#{updated_at},#{account_uuid})
+        insert into account_verify(`id`,`from_type`,`verify_name`,`verify_type`,`code`,`code_time`,`status`,`created_at`,`updated_at`,`sys_id`)
+        values(#{id},#{from_type},#{verify_name},#{verify_type},#{code},#{code_time},#{status},#{created_at},#{updated_at},#{sys_id})
     </insert>
 
     <update id="update" parameterType="AccountVerify">
         update account_verify set
           `from_type`=#{from_type},`verify_name`=#{verify_name},`verify_type`=#{verify_type},`code`=#{code},`code_time`=#{code_time},
-          `status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at},`account_uuid`=#{account_uuid}
+          `status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at},`sys_id`=#{sys_id}
         where `id`=#{id}
     </update>
 
@@ -41,7 +41,7 @@
         select
           <include refid="Base_Column_List"/>
         from account_verify
-        where `account_uuid`=#{account_uuid} and `verify_name`=#{verify_name} and `from_type`=#{from_type}
+        where `sys_id`=#{sys_id} and `verify_name`=#{verify_name} and `from_type`=#{from_type}
         order by id desc
         limit 1
     </select>
