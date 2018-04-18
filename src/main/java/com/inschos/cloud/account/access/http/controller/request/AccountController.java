@@ -43,6 +43,8 @@ public class AccountController {
         return  accountAction.forgetPassword(bean,method);
     }
 
+
+
     @GetActionBeanAnnotation
     @RequestMapping("/resetPwd")
     @ResponseBody
@@ -50,6 +52,12 @@ public class AccountController {
         return  accountAction.resetPassword(bean);
     }
 
+    @GetActionBeanAnnotation
+    @RequestMapping("/resetPwd/*")
+    @ResponseBody
+    public String resetPassword1(ActionBean bean){
+        return  accountAction.resetPassword(bean);
+    }
 
     @GetActionBeanAnnotation(isCheckAccess = false)
     @RequestMapping("/sendCode/*")
