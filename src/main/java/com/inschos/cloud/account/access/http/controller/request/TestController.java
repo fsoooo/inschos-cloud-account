@@ -2,7 +2,7 @@ package com.inschos.cloud.account.access.http.controller.request;
 
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
-import com.inschos.cloud.account.access.rpc.client.CompanyServiceClient;
+import com.inschos.cloud.account.access.rpc.client.CompanyClient;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class TestController {
 
     @Autowired
-    private CompanyServiceClient companyServiceClient;
+    private CompanyClient companyClient;
 
 
     @RequestMapping("/do")
@@ -27,7 +27,7 @@ public class TestController {
         CompanyBean bean1 = new CompanyBean();
         bean1.name="233333333333哈哈哈111哈";
         bean1.email="xxxx@164.co";
-        int i = companyServiceClient.addCompany(bean1);
+        Object i = companyClient.addCompany(bean1);
         return String.valueOf(i);
     }
 
