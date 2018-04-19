@@ -8,6 +8,7 @@ import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.annotation.GetActionBeanAnnotation;
 import com.inschos.cloud.account.assist.kit.HttpKit;
 import com.inschos.cloud.account.assist.kit.JsonKit;
+import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -35,7 +36,11 @@ public class HttpAopDefine {
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
 			String referer = request.getHeader("referer");
-// TODO: 2018/4/11   header  没有 referer
+
+			L.log.info("request : {}",JsonKit.bean2Json(request));
+
+			L.log.info("request content : {}",request.getContentType());
+
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
