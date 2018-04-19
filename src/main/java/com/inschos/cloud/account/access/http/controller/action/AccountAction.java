@@ -159,6 +159,7 @@ public class AccountAction extends BaseAction {
                             errMsg = "手机号已注册";
                             accountNameExsitFlag = true;
                         }else{
+                            userId="1";
                             // TODO: 2018/3/28  rpc  create user info
                         }
                         break;
@@ -168,6 +169,7 @@ public class AccountAction extends BaseAction {
                             errMsg = "邮箱地址已注册";
                             accountNameExsitFlag = true;
                         }else{
+                            userId="1";
                             // TODO: 2018/3/28 rpc create company info
                         }
                         break;
