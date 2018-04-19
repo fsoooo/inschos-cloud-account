@@ -23,10 +23,11 @@ public class AccountVerifyDao {
      * @param fromAccountType 验证账号来源
      * @return
      */
-    public AccountVerify findLatestByFromVerify(String verifyName,int fromAccountType){
+    public AccountVerify findLatestByFromVerify(String verifyName,int fromAccountType,long sysId){
         AccountVerify search = new AccountVerify();
         search.verify_name = verifyName;
         search.from_type = fromAccountType;
+        search.sys_id = sysId;
         return accountVerifyMapper.findLatestByFromVerify(search);
     }
 

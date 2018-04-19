@@ -522,7 +522,7 @@ public class AccountAction extends BaseAction {
 
     private String _toSendCode(String verifyName,int accountType,int verifyType,long sysId){
 
-        AccountVerify accountVerify = accountVerifyDao.findLatestByFromVerify(verifyName,accountType);;
+        AccountVerify accountVerify = accountVerifyDao.findLatestByFromVerify(verifyName,accountType,sysId);
 
         long currentTime = TimeKit.currentTimeMillis();
         String code = null;
@@ -588,7 +588,7 @@ public class AccountAction extends BaseAction {
         boolean verifyFlag = false;
         if(!StringKit.isEmpty(verifyName)) {
             long currentTime = TimeKit.currentTimeMillis();
-            AccountVerify verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType);
+            AccountVerify verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType,sysId);
 
             if (verify != null && verify.status == AccountVerify.STATUS_NOT_USE && currentTime < verify.code_time) {
                 verifyFlag = verify.code.equals(code);
@@ -597,7 +597,6 @@ public class AccountAction extends BaseAction {
                     updateUsed.updated_at = currentTime;
                     updateUsed.status = AccountVerify.STATUS_USED;
                     updateUsed.id= verify.id;
-                    updateUsed.sys_id = sysId;
                     accountVerifyDao.updateStatus(updateUsed);
                 }
             }
