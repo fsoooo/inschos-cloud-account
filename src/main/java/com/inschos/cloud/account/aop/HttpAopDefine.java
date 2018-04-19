@@ -41,6 +41,19 @@ public class HttpAopDefine {
 
 			L.log.info("request content : {}",request.getContentType());
 
+			L.log.info("request content : {}",request.getAuthType());
+
+			L.log.info("request content : {}",request.getContextPath());
+			L.log.info("request content : {}",request.getCookies());
+
+			L.log.info("request content : {}",request.getMethod());
+
+			L.log.info("request content : {}",request.getPathInfo());
+
+			L.log.info("request content : {}",request.getCharacterEncoding());
+
+			L.log.info("request content : {}",request.getRemoteHost());
+
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
