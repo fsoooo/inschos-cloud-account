@@ -20,12 +20,12 @@
 				<property name="writeAcceptCharset" value="false"/>
 				<property name="supportedMediaTypes">
 					<list>
-						<value>text/html;charset=UTF-8</value>
+						<!--<value>text/html;charset=UTF-8</value>-->
 						<value>application/json;charset=UTF-8</value>
 					</list>
 				</property>
-				<property name="defaultCharset" value="UTF-8" />
-				<constructor-arg value="UTF-8" />
+				<!--<property name="defaultCharset" value="UTF-8" />-->
+				<!--<constructor-arg value="UTF-8" />-->
 			</bean>
 		</mvc:message-converters>
 	</mvc:annotation-driven>
