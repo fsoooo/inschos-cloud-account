@@ -8,7 +8,6 @@ import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.annotation.GetActionBeanAnnotation;
 import com.inschos.cloud.account.assist.kit.HttpKit;
 import com.inschos.cloud.account.assist.kit.JsonKit;
-import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -36,24 +35,6 @@ public class HttpAopDefine {
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
 			String referer = request.getHeader("referer");
-
-			L.log.info("request : {}",JsonKit.bean2Json(request));
-
-			L.log.info("request content : {}",request.getContentType());
-
-			L.log.info("request content : {}",request.getAuthType());
-
-			L.log.info("request content : {}",request.getContextPath());
-			L.log.info("request content : {}",request.getCookies());
-
-			L.log.info("request content : {}",request.getMethod());
-
-			L.log.info("request content : {}",request.getPathInfo());
-
-			L.log.info("request content : {}",request.getCharacterEncoding());
-
-			L.log.info("request content : {}",request.getRemoteHost());
-
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
