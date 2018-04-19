@@ -187,7 +187,6 @@ public class AccountAction extends BaseAction {
                 addRecord.phone = request.phone;
                 addRecord.email = request.email;
                 addRecord.user_type = accountType;
-                addRecord.account_uuid = "";
                 addRecord.user_id = userId;
                 addRecord.salt = salt;
                 addRecord.state = Common.STATE_ONLINE;
