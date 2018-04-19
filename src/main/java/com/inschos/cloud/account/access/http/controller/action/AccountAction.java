@@ -137,7 +137,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,null);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,system.id);
 
         if(verifyFlag){
             String password = request.password.trim();
@@ -247,7 +247,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.sysId);
 
         if (verifyFlag) {
             Account updateRecord = new Account();
@@ -313,7 +313,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMsg, response);
         }
 
-        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.accountUuid);
+        boolean verifyFlag = _checkCode( verifyNameInput, request.code, accountType,bean.sysId);
 
         if (verifyFlag) {
             Account account;
@@ -448,7 +448,7 @@ public class AccountAction extends BaseAction {
         if(errMessage.hasError()){
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
-        boolean verifyFlag = _checkCode( request.phone,request.code, bean.type, bean.accountUuid);
+        boolean verifyFlag = _checkCode( request.phone,request.code, bean.type, bean.sysId);
 
         if(verifyFlag){
             Account account = accountDao.findByAccount(bean.sysId,request.phone,bean.type,Account.ACCOUNT_FILED_PHONE);
@@ -481,7 +481,7 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
 
-        boolean verifyFlag = _checkCode( request.email,request.code, bean.type, bean.accountUuid);
+        boolean verifyFlag = _checkCode( request.email,request.code, bean.type, bean.sysId);
         if(verifyFlag){
             Account account = accountDao.findByAccount(bean.sysId,request.email,bean.type,Account.ACCOUNT_FILED_EMAIL);
 
@@ -584,7 +584,7 @@ public class AccountAction extends BaseAction {
 
     }
 
-    private boolean _checkCode(String verifyName,String code,int accountType,String accountUuid){
+    private boolean _checkCode(String verifyName,String code,int accountType,long sysId){
         boolean verifyFlag = false;
         if(!StringKit.isEmpty(verifyName)) {
             long currentTime = TimeKit.currentTimeMillis();
@@ -597,6 +597,7 @@ public class AccountAction extends BaseAction {
                     updateUsed.updated_at = currentTime;
                     updateUsed.status = AccountVerify.STATUS_USED;
                     updateUsed.id= verify.id;
+                    updateUsed.sys_id = sysId;
                     accountVerifyDao.updateStatus(updateUsed);
                 }
             }
