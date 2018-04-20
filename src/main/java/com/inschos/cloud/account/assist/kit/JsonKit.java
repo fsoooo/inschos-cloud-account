@@ -20,7 +20,7 @@ public class JsonKit {
             T value = objectMapper.readValue(json, clazz);
             return value;
         } catch (Exception e) {
-            e.printStackTrace();
+            L.log.error("json 2 bean Exception : {}",e.getMessage(),e);
         }
         return null;
     }
@@ -35,7 +35,7 @@ public class JsonKit {
             T value = objectMapper.readValue(json, typeReference);
             return value;
         } catch (IOException e) {
-            e.printStackTrace();
+            L.log.error("json 2 bean Exception : {}",e.getMessage(),e);
         }
         return null;
     }
@@ -45,6 +45,7 @@ public class JsonKit {
             objectMapper.setSerializationInclusion(Include.NON_NULL);
             return objectMapper.writeValueAsString(object);
         } catch (Exception e) {
+            L.log.error("bean 2 json Exception : {}",e.getMessage(),e);
             return null;
         }
     }

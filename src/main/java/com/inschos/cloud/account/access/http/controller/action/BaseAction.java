@@ -6,6 +6,7 @@ import com.inschos.cloud.account.access.http.controller.bean.PageBean;
 import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.annotation.ParamCheckAnnotation;
 import com.inschos.cloud.account.assist.kit.JsonKit;
+import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import com.inschos.cloud.account.model.Page;
 
@@ -15,7 +16,15 @@ import java.util.List;
 public class BaseAction {
 
 	public <T> T requst2Bean(String body, Class<T> clazz) {
-		return JsonKit.json2Bean(body, clazz);
+		T bean = JsonKit.json2Bean(body, clazz);
+		if(bean==null){
+			try {
+				bean =  clazz.newInstance();
+			} catch (Exception e) {
+				L.log.error("request bean error : {}",e.getMessage(),e);
+			}
+		}
+		return bean;
 	}
 
 	public String json(int code, String message, BaseResponse response) {

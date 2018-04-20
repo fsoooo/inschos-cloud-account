@@ -100,11 +100,10 @@ public class HttpAopDefine {
 		}
 
 		if (isAuthCheck) {
-			if (!ActionBean.getSalt(bean.salt).equals(bean.salt)) {
+			if (!ActionBean.isValidSalt(bean.salt)) {
 				return false;
 			}
 		}
-
 		return true;
 	}
 }

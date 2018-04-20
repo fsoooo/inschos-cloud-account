@@ -41,6 +41,17 @@ public class ActionBean {
 		}
 	}
 
+	public static boolean isValidSalt(String salt){
+		String  prefixSalt ;
+		if (ConstantKit.IS_PRODUCT) {
+			prefixSalt = SALT_VALUE_ONLINE;
+		} else {
+			prefixSalt = SALT_VALUE_TEST;
+		}
+		return salt!=null&& salt.startsWith(prefixSalt);
+	}
+
+
 	public static String packageToken(ActionBean bean) {
 		if (bean != null) {
 			String token = JsonKit.bean2Json(bean);

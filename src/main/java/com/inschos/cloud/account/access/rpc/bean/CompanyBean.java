@@ -61,7 +61,7 @@ public class CompanyBean {
     /**
      * 认证状态 0:未认证 1:已认证
      */
-    public String authentication;
+    public int authentication;
 
     /**
      * 营业执照图片
