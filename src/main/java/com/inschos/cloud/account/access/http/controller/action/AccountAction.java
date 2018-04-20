@@ -407,7 +407,7 @@ public class AccountAction extends BaseAction {
     }
 
 
-    public String verifyCode(ActionBean bean,String requestAccountType){
+    public String checkSendCode(ActionBean bean,String requestAccountType){
 
 
         return null;

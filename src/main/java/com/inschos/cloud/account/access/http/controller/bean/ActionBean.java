@@ -66,7 +66,7 @@ public class ActionBean {
 		ActionBean bean = null;
 		try {
 			if (!StringKit.isEmpty(token)) {
-				token.replaceAll(" ","+");
+				token = token.replaceAll(" ","+");
 				String tokenString = rc4.decry_RC4_base64(token);
 
 				if (!StringKit.isEmpty(tokenString)) {

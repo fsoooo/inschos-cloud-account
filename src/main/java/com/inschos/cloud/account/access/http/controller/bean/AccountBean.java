@@ -65,6 +65,27 @@ public class AccountBean {
 
     }
 
+    public static class CheckCodeRequest extends BaseRequest{
+
+        public String phone;
+
+        public String email;
+
+        @ParamCheckAnnotation(name = "验证方式",isCheckEmpty = true)
+        public String method;
+
+        @ParamCheckAnnotation(name = "验证码",isCheckEmpty = true)
+        public String code;
+
+    }
+
+    public static class CheckCodeResponse extends BaseResponse{
+
+//        public VerifyTokenData data;
+
+    }
+
+
     public static class ModifyPasswordRequest extends BaseRequest{
 
         @ParamCheckAnnotation(name = "原密码",isCheckEmpty = true)
@@ -142,12 +163,12 @@ public class AccountBean {
         public String token;
 
     }
-//
-//    public static class VerifyTokenData{
-//
-//        public String verifyToken;
-//
-//    }
+
+    public static class VerifyTokenData{
+
+        public String verifyToken;
+
+    }
 
     public static class RegistrySuccessData{
 
