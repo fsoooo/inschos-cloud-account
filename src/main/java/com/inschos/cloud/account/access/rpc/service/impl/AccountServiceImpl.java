@@ -26,6 +26,7 @@ public class AccountServiceImpl implements AccountService{
         ActionBean actionBean = ActionBean.parseToken(token);
         AccountBean accountBean = null;
         if(actionBean!=null){
+
             Account account = accountDao.findByUuid(actionBean.accountUuid);
             if(token!=null && account!=null && ActionBean.getSalt(account.salt).equals(actionBean.salt)){
                 accountBean = new AccountBean();

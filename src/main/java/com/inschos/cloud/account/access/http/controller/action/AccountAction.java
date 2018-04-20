@@ -407,6 +407,14 @@ public class AccountAction extends BaseAction {
     }
 
 
+    public String verifyCode(ActionBean bean,String requestAccountType){
+
+
+        return null;
+
+    }
+
+
 
     public String modifyPassword(ActionBean bean){
         ModifyPasswordRequest request = requst2Bean(bean.body, ModifyPasswordRequest.class);
