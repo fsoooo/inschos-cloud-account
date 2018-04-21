@@ -18,14 +18,14 @@ public class CompanyClient {
 
     private String uri = "/rpc/company";
 
-    public CompanyService getService(){
+    private CompanyService getService(){
         return new HproseHttpClient(host+uri).useService(CompanyService.class);
     }
 
-    public int addCompany(CompanyBean params) {
+    public int addCompany(CompanyBean bean) {
         try{
             CompanyService service = getService();
-            return service.addCompany(params);
+            return service.addCompany(bean);
         }catch(Exception e){
             L.log.error("rpc error {}",e.getMessage(),e);
             return 0;

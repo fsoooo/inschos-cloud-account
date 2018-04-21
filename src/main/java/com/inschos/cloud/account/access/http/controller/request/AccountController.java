@@ -67,6 +67,31 @@ public class AccountController {
         return  accountAction.sendCode(bean,method);
     }
 
+    @GetActionBeanAnnotation(isCheckAccess = false)
+    @RequestMapping("/checkSendCode/*")
+    @ResponseBody
+    public String checkSendCode(ActionBean bean){
+        String method = StringKit.splitLast(bean.url, "/");
+        return  accountAction.checkSendCode(bean,method);
+    }
+
+
+    @GetActionBeanAnnotation
+    @RequestMapping("/chooseManager")
+    @ResponseBody
+    public String chooseManager(ActionBean bean){
+        return  accountAction.chooseManager(bean);
+    }
+
+    @GetActionBeanAnnotation
+    @RequestMapping("/listManager")
+    @ResponseBody
+    public String listManager(ActionBean bean){
+        return  accountAction.listManager(bean);
+    }
+
+
+
 
     @GetActionBeanAnnotation
     @RequestMapping("/modifyPwd")

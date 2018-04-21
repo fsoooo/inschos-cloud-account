@@ -32,12 +32,12 @@ public class ResponseMessage {
     }
 
     public static class ResMessageKV{
-        public String key;
-        public String value;
+        public String digest;
+        public String details;
 
         public ResMessageKV(String k,String v){
-            this.key = k;
-            this.value = v;
+            this.digest = k;
+            this.details = v;
         }
     }
 

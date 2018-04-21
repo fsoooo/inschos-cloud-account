@@ -9,4 +9,10 @@ public interface CompanyService {
 
     int addCompany(CompanyBean params);
 
+    CompanyBean getCompanyById(int id) ;
+
+
+    String  getBrokerageByChannelIdForManagerSystem(Object o);
+
+
 }
