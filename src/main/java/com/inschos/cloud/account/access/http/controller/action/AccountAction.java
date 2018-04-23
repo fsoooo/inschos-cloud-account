@@ -213,8 +213,8 @@ public class AccountAction extends BaseAction {
 
             if(resultAdd>0){
                 response.data = new RegistrySuccessData();
-                response.data.usernameTxt = "您的账号："+request.username;
-                response.data.passwordTxt = "登录密码："+request.password;
+                response.data.usernameTxt = request.username;
+                response.data.passwordTxt = request.password;
                 return json(BaseResponse.CODE_SUCCESS,"注册成功", response);
             }else{
                 return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"注册失败":errMsg, response);
