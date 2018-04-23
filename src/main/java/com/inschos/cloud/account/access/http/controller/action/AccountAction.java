@@ -169,7 +169,8 @@ public class AccountAction extends BaseAction {
 
             int resultAdd = 0;
             if(!accountNameExsitFlag){
-                String userId = null;
+                //todo
+                String userId = "1";
                 switch (accountType){
                     case Account.TYPE_CUST_USER:
 

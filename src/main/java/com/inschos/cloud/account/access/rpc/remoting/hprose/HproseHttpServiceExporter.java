@@ -61,7 +61,7 @@ public class HproseHttpServiceExporter extends RemoteExporter implements Initial
 		p3p = value;
 	}
 
-	public void setDebugEnabled(boolean value) {
+	public void setDebug(boolean value) {
 		debug = value;
 	}
 
@@ -94,5 +94,6 @@ public class HproseHttpServiceExporter extends RemoteExporter implements Initial
 			throws ServletException, IOException {
 		httpService.handle(new HttpContext(httpService, request, response, null, null));
 	}
+
 
 }

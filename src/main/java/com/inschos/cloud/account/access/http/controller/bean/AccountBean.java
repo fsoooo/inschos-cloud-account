@@ -11,10 +11,10 @@ public class AccountBean {
 
     public static class LoginRequest extends BaseRequest{
 
-        @ParamCheckAnnotation(name = "用户名",isCheckEmpty = true,isCheckMinLength = 6,isCheckMaxLength = 20)
+        @ParamCheckAnnotation(name = "用户名",isCheckEmpty = true)
         public String username;
 
-        @ParamCheckAnnotation(name = "密码",isCheckEmpty = true,isCheckMinLength = 6,isCheckMaxLength = 20)
+        @ParamCheckAnnotation(name = "密码",isCheckEmpty = true)
         public String password ;
 
     }

@@ -11,6 +11,7 @@
 	<!-- 引入属性文件 -->
 	<context:property-placeholder location="classpath:config.properties" />
 
+
 	<context:component-scan base-package="com.inschos.cloud.account">
 		<context:exclude-filter type="annotation"
 			expression="org.springframework.stereotype.Controller" />
