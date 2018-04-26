@@ -4,8 +4,11 @@ import com.inschos.cloud.account.access.http.controller.bean.AccountBean.*;
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.http.controller.bean.BaseResponse;
 import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
+import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
 import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
 import com.inschos.cloud.account.access.rpc.bean.CustomerBean;
+import com.inschos.cloud.account.access.rpc.bean.PersonBean;
+import com.inschos.cloud.account.access.rpc.client.AgentJobClient;
 import com.inschos.cloud.account.access.rpc.client.CompanyClient;
 import com.inschos.cloud.account.access.rpc.client.CustomerClient;
 import com.inschos.cloud.account.access.rpc.client.PersonClient;
@@ -44,6 +47,8 @@ public class AccountAction extends BaseAction {
     private PersonClient personClient;
     @Autowired
     private CustomerClient customerClient;
+    @Autowired
+    private AgentJobClient agentJobClient;
 
     private final long CODE_VALID_TIME = 10*60*1000L;
 
@@ -86,14 +91,31 @@ public class AccountAction extends BaseAction {
 
                 TokenData tokenData = new TokenData();
                 String managerUuid = null;
-                if(accountType==Account.TYPE_COMPANY){
-                    managerUuid = account.account_uuid;
-                }else if (accountType==Account.TYPE_AGENT){
-                    managerUuid = "";
-                    // TODO: 2018/4/21 获取代理人uuid
-                    tokenData.needManager = "1";
-                }
+                switch (accountType){
+                    case Account.TYPE_CUST_USER:
+                    case Account.TYPE_CUST_COM:
+                        Account searchManager = new Account();
+                        searchManager.sys_id =system.id;
+                        searchManager.user_type = Account.TYPE_COMPANY;
+                        Account accountManager = accountDao.findOneBySysType(searchManager);
+                        if(accountManager!=null){
+                            managerUuid = accountManager.account_uuid;
+                        }
+                        break;
+                    case Account.TYPE_COMPANY:
+                        managerUuid = account.account_uuid;
+                        break;
+                    case Account.TYPE_AGENT:
 
+
+                        List<Account> list = getExistsManagerUuid(account.user_id, system.id);
+                        if(list.size()==1){
+                            managerUuid = list.get(0).account_uuid;
+                        }else if(list.size()>1){
+                            tokenData.needManager = "1";
+                        }
+                        break;
+                }
 
                 String token = null;
                 long timeMillis = TimeKit.currentTimeMillis();
@@ -187,7 +209,10 @@ public class AccountAction extends BaseAction {
                 String userId = null;
                 switch (accountType){
                     case Account.TYPE_CUST_USER: {
-                        int resultId = personClient.saveInfo(phone);
+                        PersonBean personBean = new PersonBean();
+                        personBean.phone = phone;
+                        personBean.cust_type = PersonBean.CUST_TYPE_USER;
+                        int resultId = personClient.saveInfo(personBean);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
@@ -197,7 +222,7 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
                         companyBean.email = email;
-                        int resultId = companyClient.addCompany(companyBean);
+                        long resultId = companyClient.addCompany(companyBean);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
@@ -205,8 +230,33 @@ public class AccountAction extends BaseAction {
                         break;
                     }
                     case Account.TYPE_AGENT:
-                        // TODO: 2018/4/20 触发人员
+                    {
+                        PersonBean personBean = new PersonBean();
+                        personBean.phone = phone;
+                        personBean.cust_type = PersonBean.CUST_TYPE_AGENT;
+
+                        long resultId = 0;
+
+                        Account searchListSysType = new Account();
+                        searchListSysType.user_type = Account.TYPE_COMPANY;
+                        searchAManager.sys_id = system.id;
+                        List<Account> accountList = accountDao.findListBySysType(searchListSysType);
+                        AgentJobBean agentPerson = null;
+                        if(accountList!=null && !accountList.isEmpty()){
+                            List<String> list = ListKit.toColumnList(accountList, v -> v.account_uuid);
+                            agentPerson = agentJobClient.getAgentPersonId(phone, list);
+                        }
+                        if(agentPerson==null){
+                            resultId = personClient.saveInfo(personBean);
+                        }else{
+                            resultId = agentPerson.person_id;
+                        }
+
+                        if(resultId>0){
+                            userId = String.valueOf(resultId);
+                        }
                         break;
+                    }
 
                 }
                 if(userId==null){
@@ -472,10 +522,22 @@ public class AccountAction extends BaseAction {
 
         List<ManagerData> list = new ArrayList<>();
 
-        // TODO: 2018/4/20  获取list
+        Account account = accountDao.findByUuid(bean.accountUuid);
+        if(account!=null){
 
+            List<Account> listManager = getExistsManagerUuid(account.user_id, bean.sysId);
+            for (Account at : listManager) {
+                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(at.user_id));
+                if(companyBean!=null){
+                    ManagerData managerData = new ManagerData();
+                    managerData.managerName = companyBean.name;
+                    managerData.managerUuid = at.account_uuid;
+                    list.add(managerData);
+                }
+            }
+        }
         response.data = list;
-        return json(BaseResponse.CODE_FAILURE,"获取失败", response);
+        return json(BaseResponse.CODE_SUCCESS,"获取成功", response);
     }
 
     public String chooseManager(ActionBean bean){
@@ -486,25 +548,32 @@ public class AccountAction extends BaseAction {
         if(errMessage.hasError()){
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
-
-        bean.managerUuid = request.managerUuid;
-
-        // TODO: 2018/4/20   验证 managerUuid
-
-        String token = null;
-        Account account = new Account();
-        long timeMillis = TimeKit.currentTimeMillis();
-        account.token = getLoginToken(bean.accountUuid,bean.type,bean.managerUuid,bean.sysId,bean.salt);
-        account.updated_at = timeMillis;
-        account.account_uuid = bean.accountUuid;
-        if(accountDao.updateTokenByUuid(account)>0){
-            token = account.token;
+        boolean isVaild = false;
+        Account accountU = accountDao.findByUuid(bean.accountUuid);
+        if(accountU!=null){
+            List<Account> listManager = getExistsManagerUuid(accountU.user_id, bean.sysId);
+            List<String> columnList = ListKit.toColumnList(listManager, v -> v.account_uuid);
+            isVaild =columnList.indexOf(request.managerUuid)>-1;
         }
 
-        if(!StringKit.isEmpty(token)){
-            response.data = new TokenData();
-            response.data.token = token;
-            return json(BaseResponse.CODE_SUCCESS,"企业切换成功", response);
+        if(isVaild){
+            bean.managerUuid = request.managerUuid;
+            String token = null;
+            Account account = new Account();
+            long timeMillis = TimeKit.currentTimeMillis();
+            account.token = getLoginToken(bean.accountUuid,bean.type,bean.managerUuid,bean.sysId,bean.salt);
+            account.updated_at = timeMillis;
+            account.account_uuid = bean.accountUuid;
+            if(accountDao.updateTokenByUuid(account)>0){
+                token = account.token;
+            }
+            if(!StringKit.isEmpty(token)){
+                response.data = new TokenData();
+                response.data.token = token;
+                return json(BaseResponse.CODE_SUCCESS,"企业切换成功", response);
+            }else{
+                return json(BaseResponse.CODE_FAILURE,"企业切换失败", response);
+            }
         }else{
             return json(BaseResponse.CODE_FAILURE,"企业切换失败", response);
         }
@@ -754,6 +823,24 @@ public class AccountAction extends BaseAction {
 
     }
 
+    private List<Account> getExistsManagerUuid(String userId,long sysId){
+        List<AgentJobBean> agents = agentJobClient.getAgents(Long.valueOf(userId));
+        List<Account> exists = new ArrayList<>();
+        if(agents!=null){
+            Account searchManagers = new Account();
+            searchManagers.sys_id = sysId;
+            searchManagers.user_type = Account.TYPE_COMPANY;
+            List<Account> accounts = accountDao.findListBySysType(searchManagers);
+            List<String> columnList = ListKit.toColumnList(agents, v -> v.manager_uuid);
+
+            for (Account account : accounts) {
+                if(columnList.indexOf(account.account_uuid)>-1){
+                    exists.add(account);
+                }
+            }
+        }
+        return exists;
+    }
 
 
 

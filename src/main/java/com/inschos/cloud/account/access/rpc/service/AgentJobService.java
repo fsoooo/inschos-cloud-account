@@ -1,5 +1,7 @@
 package com.inschos.cloud.account.access.rpc.service;
 
+import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
+
 import java.util.List;
 
 /**
@@ -7,8 +9,8 @@ import java.util.List;
  */
 public interface AgentJobService {
 
-    Object getAgentManagers(long personId);
+    List<AgentJobBean> getAgentManagers(long personId);
 
 
-    Object getAgentPersonInfo(String phone,List<String> managerUuids);
+    AgentJobBean getAgentPersonInfo(String phone,List<String> managerUuids);
 }

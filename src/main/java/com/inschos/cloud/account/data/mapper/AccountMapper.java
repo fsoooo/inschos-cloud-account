@@ -2,6 +2,8 @@ package com.inschos.cloud.account.data.mapper;
 
 import com.inschos.cloud.account.model.Account;
 
+import java.util.List;
+
 /**
  * Created by IceAnt on 2018/3/20.
  */
@@ -30,5 +32,7 @@ public interface AccountMapper {
     public Account findByUuid(String accountUuid);
 
     public Account findOneBySysType(Account search);
+
+    public List<Account> findListBySysType(Account search);
 
 }

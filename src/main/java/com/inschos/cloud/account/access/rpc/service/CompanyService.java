@@ -7,12 +7,9 @@ import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
  */
 public interface CompanyService {
 
-    int addCompany(CompanyBean params);
+    long addCompany(CompanyBean params);
 
-    CompanyBean getCompanyById(int id) ;
-
-
-    String  getBrokerageByChannelIdForManagerSystem(Object o);
+    CompanyBean getCompanyById(long id) ;
 
 
 }

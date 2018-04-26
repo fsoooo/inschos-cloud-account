@@ -1,5 +1,6 @@
 package com.inschos.cloud.account.access.rpc.client;
 
+import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
 import com.inschos.cloud.account.access.rpc.service.AgentJobService;
 import com.inschos.cloud.account.assist.kit.L;
 import hprose.client.HproseHttpClient;
@@ -23,7 +24,7 @@ public class AgentJobClient {
         return new HproseHttpClient(host+uri).useService(AgentJobService.class);
     }
 
-    public Object getAgents(long personId) {
+    public List<AgentJobBean> getAgents(long personId) {
         try{
             AgentJobService service = getService();
             return service.getAgentManagers(personId);
@@ -33,15 +34,15 @@ public class AgentJobClient {
         }
     }
 
-    public Object getAgentPersonId(String phone,List<String> manageUuids) {
-        long personId = 0;
+    public AgentJobBean getAgentPersonId(String phone,List<String> manageUuids) {
+//        long personId = 0;
         try{
             AgentJobService service = getService();
             return service.getAgentPersonInfo(phone,manageUuids);
         }catch(Exception e){
             L.log.error("rpc error {}",e.getMessage(),e);
         }
-        return personId;
+        return null;
     }
 
 }

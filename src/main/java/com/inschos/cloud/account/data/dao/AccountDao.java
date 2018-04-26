@@ -6,6 +6,8 @@ import com.inschos.cloud.account.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Created by IceAnt on 2018/3/23.
  */
@@ -45,6 +47,10 @@ public class AccountDao {
 
     public Account findOneBySysType(Account search){
         return search!=null?accountMapper.findOneBySysType(search):null;
+    }
+
+    public List<Account> findListBySysType(Account search){
+        return search!=null?accountMapper.findListBySysType(search):null;
     }
 
     public int registry(Account account){

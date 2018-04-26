@@ -1,8 +1,10 @@
 package com.inschos.cloud.account.access.http.controller.request;
 
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
+import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
 import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
 import com.inschos.cloud.account.access.rpc.bean.CustomerBean;
+import com.inschos.cloud.account.access.rpc.bean.PersonBean;
 import com.inschos.cloud.account.access.rpc.client.AgentJobClient;
 import com.inschos.cloud.account.access.rpc.client.CompanyClient;
 import com.inschos.cloud.account.access.rpc.client.CustomerClient;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IceAnt on 2018/4/19.
@@ -40,7 +43,9 @@ public class TestController {
         CompanyBean bean1 = new CompanyBean();
         bean1.name="233333333333哈哈哈111哈";
         bean1.email="xxxx@164.co";
-        int info = personClient.saveInfo("15101691357");
+        PersonBean account = new PersonBean();
+        account.phone = "15101691357";
+        int info = personClient.saveInfo(account);
 
         CustomerBean customerBean = new CustomerBean();
         customerBean.type = 1;
@@ -51,8 +56,8 @@ public class TestController {
 
         ArrayList<String> list = new ArrayList<>();
         list.add("2");
-        Object agentPersonId = agentJobClient.getAgentPersonId("2", list);
-        Object agents = agentJobClient.getAgents(2);
+        AgentJobBean agentPersonId = agentJobClient.getAgentPersonId("2", list);
+        List<AgentJobBean> agents = agentJobClient.getAgents(2);
 
 
 //        companyClient.getI();

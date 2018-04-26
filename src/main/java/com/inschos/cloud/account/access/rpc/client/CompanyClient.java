@@ -22,13 +22,23 @@ public class CompanyClient {
         return new HproseHttpClient(host+uri).useService(CompanyService.class);
     }
 
-    public int addCompany(CompanyBean bean) {
+    public long addCompany(CompanyBean bean) {
         try{
             CompanyService service = getService();
             return service.addCompany(bean);
         }catch(Exception e){
             L.log.error("rpc error {}",e.getMessage(),e);
             return 0;
+        }
+    }
+
+    public CompanyBean getCompanyById(long id) {
+        try{
+            CompanyService service = getService();
+            return service.getCompanyById(id);
+        }catch(Exception e){
+            L.log.error("rpc error {}",e.getMessage(),e);
+            return null;
         }
     }
 }

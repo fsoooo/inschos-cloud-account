@@ -119,5 +119,14 @@
             limit 1
         </where>
     </select>
+    <select id="findListBySysType" parameterType="Account" resultType="Account">
+        select
+        <include refid="Base_Column_List"/>
+        from account
+        <where>
+            `sys_id`=#{sys_id} and `user_type`=#{user_type} and state=1
+            order by id
+        </where>
+    </select>
 
 </mapper>
