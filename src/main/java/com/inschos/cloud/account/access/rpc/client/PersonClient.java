@@ -1,7 +1,7 @@
 package com.inschos.cloud.account.access.rpc.client;
 
 import com.inschos.cloud.account.access.rpc.service.PersonService;
-import com.inschos.cloud.account.assist.kit.L;
+import com.inschos.cloud.account.assist.kit.StringKit;
 import hprose.client.HproseHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,15 +22,16 @@ public class PersonClient {
     }
 
 
-    public int  saveInfo(){
-
+    public int  saveInfo(String phone){
+        int insertId = 0;
         try {
-            int resultId = getService().saveInfo();
-            return resultId;
+            if (!StringKit.isEmpty(phone)){
+                insertId = getService().saveInfo(phone);
+            }
         }catch (Exception e){
-            L.log.error("rpc error {}",e.getMessage(),e);
             return 0;
         }
+        return insertId;
     }
 
 

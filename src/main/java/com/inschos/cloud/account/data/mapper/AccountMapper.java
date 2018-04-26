@@ -29,6 +29,6 @@ public interface AccountMapper {
 
     public Account findByUuid(String accountUuid);
 
-    public Account findOneChannelSystem(Account search);
+    public Account findOneBySysType(Account search);
 
 }

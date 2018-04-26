@@ -5,7 +5,10 @@ import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.http.controller.bean.BaseResponse;
 import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
+import com.inschos.cloud.account.access.rpc.bean.CustomerBean;
 import com.inschos.cloud.account.access.rpc.client.CompanyClient;
+import com.inschos.cloud.account.access.rpc.client.CustomerClient;
+import com.inschos.cloud.account.access.rpc.client.PersonClient;
 import com.inschos.cloud.account.assist.kit.*;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.data.dao.AccountVerifyDao;
@@ -13,8 +16,8 @@ import com.inschos.cloud.account.data.dao.PlatformSystemDao;
 import com.inschos.cloud.account.extend.worker.AccountUuidWorker;
 import com.inschos.cloud.account.model.Account;
 import com.inschos.cloud.account.model.AccountVerify;
-import com.inschos.cloud.account.model.PlatformSystem;
 import com.inschos.cloud.account.model.Common;
+import com.inschos.cloud.account.model.PlatformSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,10 @@ public class AccountAction extends BaseAction {
     private PlatformSystemDao platformSystemDao;
     @Autowired
     private CompanyClient companyClient;
+    @Autowired
+    private PersonClient personClient;
+    @Autowired
+    private CustomerClient customerClient;
 
     private final long CODE_VALID_TIME = 10*60*1000L;
 
@@ -57,7 +64,6 @@ public class AccountAction extends BaseAction {
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
-
 
         Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_USERNAME);
         switch (accountType){
@@ -102,13 +108,13 @@ public class AccountAction extends BaseAction {
                     response.data.token = token;
                     return json(BaseResponse.CODE_SUCCESS,"登录成功", response);
                 }else{
-                    return json(BaseResponse.CODE_FAILURE,"登录失败", response);
+                    return json(BaseResponse.CODE_FAILURE,"请输入正确的登录密码", response);
                 }
             }else{
                 return json(BaseResponse.CODE_FAILURE,"账号异常，请联系管理员", response);
             }
         }else{
-            return json(BaseResponse.CODE_FAILURE,"登录失败", response);
+            return json(BaseResponse.CODE_FAILURE,"请输入正确的登录密码", response);
         }
     }
 
@@ -128,6 +134,14 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
 
+        Account searchAManager = new Account();
+        searchAManager.sys_id = system.id;
+        searchAManager.user_type = Account.TYPE_COMPANY;
+        Account accountManager = accountDao.findOneBySysType(searchAManager);
+
+        if(accountManager==null){
+            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        }
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
 
@@ -168,47 +182,66 @@ public class AccountAction extends BaseAction {
             }
 
             int resultAdd = 0;
+            int custType = 0;
             if(!accountNameExsitFlag){
-                //todo
-                String userId = "1";
+                String userId = null;
                 switch (accountType){
-                    case Account.TYPE_CUST_USER:
-
-                        // TODO: 2018/4/20 触发人员
-
+                    case Account.TYPE_CUST_USER: {
+                        int resultId = personClient.saveInfo(phone);
+                        if (resultId > 0) {
+                            userId = String.valueOf(resultId);
+                        }
+                        custType = CustomerBean.TYPE_CUST_USER;
                         break;
-                    case Account.TYPE_CUST_COM:
+                    }
+                    case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
                         companyBean.email = email;
                         int resultId = companyClient.addCompany(companyBean);
-                        if(resultId>0){
+                        if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
+                        custType = CustomerBean.TYPE_CUST_COM;
                         break;
+                    }
                     case Account.TYPE_AGENT:
                         // TODO: 2018/4/20 触发人员
                         break;
 
                 }
-                Account addRecord = new Account();
-                // uuID
-                addRecord.account_uuid = String.valueOf(AccountUuidWorker.getWorker(1,1).nextId());
-                addRecord.status = Account.STATUS_NORMAL;
-                addRecord.password = Account.generatePwd(password,salt);
-                addRecord.username = request.username;
-                addRecord.phone = phone;
-                addRecord.email = email;
-                addRecord.user_type = accountType;
-                addRecord.user_id = userId;
-                addRecord.salt = salt;
-                addRecord.state = Common.STATE_ONLINE;
-                addRecord.created_at = addRecord.updated_at = TimeKit.currentTimeMillis();
-                addRecord.sys_id = system.id;
-                resultAdd = accountDao.registry(addRecord);
-                if(resultAdd>0){
-
-                    // TODO: 2018/4/12 try to add 客户关系
+                if(userId==null){
+                    userId = "1";
                 }
+                if(userId!=null){
+                    Account addRecord = new Account();
+                    // uuID
+                    addRecord.account_uuid = String.valueOf(AccountUuidWorker.getWorker(1,1).nextId());
+                    addRecord.status = Account.STATUS_NORMAL;
+                    addRecord.password = Account.generatePwd(password,salt);
+                    addRecord.username = request.username;
+                    addRecord.phone = phone;
+                    addRecord.email = email;
+                    addRecord.user_type = accountType;
+                    addRecord.user_id = userId;
+                    addRecord.salt = salt;
+                    addRecord.state = Common.STATE_ONLINE;
+                    addRecord.created_at = addRecord.updated_at = TimeKit.currentTimeMillis();
+                    addRecord.sys_id = system.id;
+                    resultAdd = accountDao.registry(addRecord);
+
+                    if(resultAdd>0){
+                        if(custType==1 || custType==2){
+
+                            CustomerBean customerBean = new CustomerBean();
+                            customerBean.type=custType;
+                            customerBean.customerId = Integer.valueOf(userId);
+                            customerBean.accountUuid = addRecord.account_uuid;
+                            customerBean.managerUuid = accountManager.account_uuid;
+                            customerClient.saveCust(customerBean);
+                        }
+                    }
+                }
+
             }
 
             if(resultAdd>0){
@@ -278,7 +311,7 @@ public class AccountAction extends BaseAction {
 //        Account searchSystem = new Account();
 //        searchSystem.sys_id = system.id;
 //        searchSystem.user_type = Account.TYPE_COMPANY;
-//        Account accountSystem = accountDao.findOneChannelSystem(searchSystem);
+//        Account accountSystem = accountDao.findOneBySysType(searchSystem);
 //        if(accountSystem==null){
 //            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
 //        }
@@ -371,7 +404,7 @@ public class AccountAction extends BaseAction {
             }
             return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
         }else{
-            return json(BaseResponse.CODE_SUCCESS,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
+            return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
         }
     }
 
@@ -425,7 +458,7 @@ public class AccountAction extends BaseAction {
                 return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
             }
         }
-        return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"请输入正确的验证码":errMsg, response);
     }
 
     public String listManager(ActionBean bean){

@@ -13,4 +13,6 @@ public interface AccountService {
 
     /** 通过账号uuid 获取账号信息*/
     public AccountBean findByUuid(String uuid);
+
+    public AccountBean findByAgentPhone(long sysId,String phone);
 }

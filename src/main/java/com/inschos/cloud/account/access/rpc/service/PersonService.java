@@ -5,5 +5,5 @@ package com.inschos.cloud.account.access.rpc.service;
  */
 public interface PersonService {
 
-    int saveInfo();
+    int saveInfo(String phone);
 }

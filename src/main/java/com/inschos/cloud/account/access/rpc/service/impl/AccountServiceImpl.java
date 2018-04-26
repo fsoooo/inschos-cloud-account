@@ -29,14 +29,8 @@ public class AccountServiceImpl implements AccountService{
 
             Account account = accountDao.findByUuid(actionBean.accountUuid);
             if(token!=null && account!=null && ActionBean.getSalt(account.salt).equals(actionBean.salt)){
-                accountBean = new AccountBean();
+                accountBean = toBean(account);
                 accountBean.managerUuid = actionBean.managerUuid;
-                accountBean.accountUuid = actionBean.accountUuid;
-                accountBean.userId = account.user_id;
-                accountBean.userType = account.user_type;
-                accountBean.username = account.username;
-                accountBean.phone = account.phone;
-                accountBean.email = account.email;
             }
         }
         return accountBean;
@@ -48,14 +42,32 @@ public class AccountServiceImpl implements AccountService{
         if(!StringKit.isEmpty(uuid)){
             Account account = accountDao.findByUuid(uuid);
             if(account!=null){
-                bean = new AccountBean();
-                bean.userId = account.user_id;
-                bean.userType = account.user_type;
-                bean.username = account.username;
-                bean.phone = account.phone;
-                bean.email = account.email;
-                bean.accountUuid = uuid;
+                bean = toBean(account);
             }
+        }
+        return bean;
+    }
+
+    @Override
+    public AccountBean findByAgentPhone(long sysId, String phone) {
+        AccountBean bean = null;
+        if(!StringKit.isEmpty(phone)){
+            Account account = accountDao.findByAccount(sysId,phone,Account.TYPE_AGENT,Account.ACCOUNT_FILED_PHONE);
+            bean = toBean(account);
+        }
+        return bean;
+    }
+
+    private AccountBean toBean(Account account){
+        AccountBean bean = new AccountBean();
+        if(account!=null){
+            bean = new AccountBean();
+            bean.userId = account.user_id;
+            bean.userType = account.user_type;
+            bean.username = account.username;
+            bean.phone = account.phone;
+            bean.email = account.email;
+            bean.accountUuid = account.account_uuid;
         }
         return bean;
     }

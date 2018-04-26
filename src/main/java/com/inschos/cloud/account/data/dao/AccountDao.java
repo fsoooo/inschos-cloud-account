@@ -43,8 +43,8 @@ public class AccountDao {
 
     }
 
-    public Account findOneChannelSystem(Account search){
-        return search!=null?accountMapper.findOneChannelSystem(search):null;
+    public Account findOneBySysType(Account search){
+        return search!=null?accountMapper.findOneBySysType(search):null;
     }
 
     public int registry(Account account){
