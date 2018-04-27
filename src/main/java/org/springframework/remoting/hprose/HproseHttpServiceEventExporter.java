@@ -1,4 +1,4 @@
-package com.inschos.cloud.account.access.rpc.remoting.hprose;
+package org.springframework.remoting.hprose;
 
 import com.inschos.cloud.account.assist.kit.L;
 import hprose.common.HproseContext;

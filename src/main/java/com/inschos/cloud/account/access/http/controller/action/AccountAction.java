@@ -97,6 +97,7 @@ public class AccountAction extends BaseAction {
                         Account searchManager = new Account();
                         searchManager.sys_id =system.id;
                         searchManager.user_type = Account.TYPE_COMPANY;
+                        // TODO: 2018/4/27  客户表  查询managerUuid
                         Account accountManager = accountDao.findOneBySysType(searchManager);
                         if(accountManager!=null){
                             managerUuid = accountManager.account_uuid;
