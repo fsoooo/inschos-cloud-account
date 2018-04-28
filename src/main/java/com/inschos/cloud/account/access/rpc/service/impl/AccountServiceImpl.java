@@ -68,6 +68,7 @@ public class AccountServiceImpl implements AccountService{
             bean.phone = account.phone;
             bean.email = account.email;
             bean.accountUuid = account.account_uuid;
+            bean.sysId = account.sys_id;
         }
         return bean;
     }

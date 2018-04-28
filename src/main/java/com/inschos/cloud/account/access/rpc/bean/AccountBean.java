@@ -27,5 +27,6 @@ public class AccountBean {
     /** 邮箱*/
     public String email;
 
+    public long sysId;
 
 }
