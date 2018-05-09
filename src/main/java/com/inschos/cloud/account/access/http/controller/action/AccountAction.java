@@ -447,7 +447,7 @@ public class AccountAction extends BaseAction {
         }
 
         if(flag){
-            return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
+            return json(BaseResponse.CODE_SUCCESS,"验证码已发送", response);
         }else{
             return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
         }
