@@ -112,7 +112,7 @@ public class AccountAction extends BaseAction {
                         List<Account> list = getExistsManagerUuid(account.user_id, system.id);
                         if(list.size()==1){
                             managerUuid = list.get(0).account_uuid;
-                        }else if(list.size()>1){
+                        }else{
                             tokenData.needManager = "1";
                         }
                         break;
@@ -537,8 +537,12 @@ public class AccountAction extends BaseAction {
                 }
             }
         }
-        response.data = list;
-        return json(BaseResponse.CODE_SUCCESS,"获取成功", response);
+        if(list.isEmpty()){
+            return json(BaseResponse.CODE_FAILURE,"很抱歉，您的账号尚未生效，请联系业管处理", response);
+        }else{
+            response.data = list;
+            return json(BaseResponse.CODE_SUCCESS,"获取成功", response);
+        }
     }
 
     public String chooseManager(ActionBean bean){
