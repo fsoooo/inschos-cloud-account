@@ -81,6 +81,12 @@ public class AccountAction extends BaseAction {
                     account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_EMAIL);
                 }
                 break;
+            case Account.TYPE_AGENT:
+                if(account==null){
+                    account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_PHONE);
+                }
+                break;
+
         }
         if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
 
