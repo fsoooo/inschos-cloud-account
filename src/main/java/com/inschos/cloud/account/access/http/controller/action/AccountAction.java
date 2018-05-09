@@ -731,11 +731,12 @@ public class AccountAction extends BaseAction {
         }
 
         if(needInsert){
-            if(ConstantKit.IS_PRODUCT){
-                code = StringKit.randNum(6);
-            }else{
-                code = "666666";
-            }
+//            if(ConstantKit.IS_PRODUCT){
+//                code = StringKit.randNum(6);
+//            }else{
+//                code = "666666";
+//            }
+            code = StringKit.randNum(6);
             AccountVerify addRecord = new AccountVerify();
             addRecord.sys_id = sysId;
             addRecord.from_type=accountType;
