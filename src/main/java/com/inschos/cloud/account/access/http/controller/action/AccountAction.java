@@ -8,10 +8,7 @@ import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
 import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
 import com.inschos.cloud.account.access.rpc.bean.CustomerBean;
 import com.inschos.cloud.account.access.rpc.bean.PersonBean;
-import com.inschos.cloud.account.access.rpc.client.AgentJobClient;
-import com.inschos.cloud.account.access.rpc.client.CompanyClient;
-import com.inschos.cloud.account.access.rpc.client.CustomerClient;
-import com.inschos.cloud.account.access.rpc.client.PersonClient;
+import com.inschos.cloud.account.access.rpc.client.*;
 import com.inschos.cloud.account.assist.kit.*;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.data.dao.AccountVerifyDao;
@@ -49,6 +46,8 @@ public class AccountAction extends BaseAction {
     private CustomerClient customerClient;
     @Autowired
     private AgentJobClient agentJobClient;
+    @Autowired
+    private SmsHandingClient smsHandingClient;
 
     private final long CODE_VALID_TIME = 10*60*1000L;
 
@@ -206,6 +205,7 @@ public class AccountAction extends BaseAction {
 
             int resultAdd = 0;
             int custType = 0;
+            String accountUuid = String.valueOf(AccountUuidWorker.getWorker(1, 1).nextId());
             if(!accountNameExsitFlag){
                 String userId = null;
                 switch (accountType){
@@ -223,7 +223,7 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
                         companyBean.email = email;
-                        long resultId = companyClient.addCompany(companyBean);
+                        long resultId = companyClient.addCompany(companyBean,accountUuid);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
@@ -260,13 +260,10 @@ public class AccountAction extends BaseAction {
                     }
 
                 }
-                if(userId==null){
-                    userId = "1";
-                }
                 if(userId!=null){
                     Account addRecord = new Account();
                     // uuID
-                    addRecord.account_uuid = String.valueOf(AccountUuidWorker.getWorker(1,1).nextId());
+                    addRecord.account_uuid = accountUuid;
                     addRecord.status = Account.STATUS_NORMAL;
                     addRecord.password = Account.generatePwd(password,salt);
                     addRecord.username = request.username;
@@ -450,9 +447,6 @@ public class AccountAction extends BaseAction {
         }
 
         if(flag){
-            if(ConstantKit.IS_PRODUCT){
-                // TODO: 2018/3/28  send code
-            }
             return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
         }else{
             return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
@@ -755,10 +749,14 @@ public class AccountAction extends BaseAction {
             flag = accountVerifyDao.insert(addRecord)>0;
         }
         if(flag){
-            return errMsg;
-        }else{
-            return null;
+            errMsg = null;
+            if(AccountVerify.VERIFY_TYPE_PHONE==verifyType){
+                if(!smsHandingClient.sendVerifyCode(verifyName,code)){
+                    errMsg = "发送失败";
+                }
+            }
         }
+        return errMsg;
 
     }
 

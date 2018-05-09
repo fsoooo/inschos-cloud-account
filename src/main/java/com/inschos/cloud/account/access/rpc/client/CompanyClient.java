@@ -22,10 +22,10 @@ public class CompanyClient {
         return new HproseHttpClient(host+uri).useService(CompanyService.class);
     }
 
-    public long addCompany(CompanyBean bean) {
+    public long addCompany(CompanyBean bean,String managerUuid) {
         try{
             CompanyService service = getService();
-            return service.addCompany(bean);
+            return service.addCompany(bean,managerUuid);
         }catch(Exception e){
             L.log.error("rpc error {}",e.getMessage(),e);
             return 0;

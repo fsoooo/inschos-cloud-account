@@ -16,7 +16,7 @@ public class CustomerClient {
     @Value("${rpc.remote.customer.host}")
     private String host;
 
-    private String uri = "/rpc/person";
+    private String uri = "/rpc/cust";
 
     private CustomerService getService(){
         return new HproseHttpClient(host+uri).useService(CustomerService.class);

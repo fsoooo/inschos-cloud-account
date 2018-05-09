@@ -7,7 +7,7 @@ import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
  */
 public interface CompanyService {
 
-    long addCompany(CompanyBean params);
+    long addCompany(CompanyBean params,String managerUuid);
 
     CompanyBean getCompanyById(long id) ;
 

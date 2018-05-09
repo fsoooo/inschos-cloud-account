@@ -18,7 +18,7 @@ public class AgentJobClient {
     @Value("${rpc.remote.customer.host}")
     private String host;
 
-    private String uri = "/rpc/person";
+    private String uri = "/rpc/agent";
 
     private AgentJobService getService(){
         return new HproseHttpClient(host+uri).useService(AgentJobService.class);
