@@ -59,7 +59,7 @@ public class AccountServiceImpl implements AccountService{
     }
 
     private AccountBean toBean(Account account){
-        AccountBean bean = new AccountBean();
+        AccountBean bean = null;
         if(account!=null){
             bean = new AccountBean();
             bean.userId = account.user_id;
