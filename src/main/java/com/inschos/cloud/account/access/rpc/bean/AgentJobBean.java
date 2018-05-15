@@ -9,16 +9,16 @@ public class AgentJobBean {
     public String manager_uuid;
 
     /** 渠道id*/
-    public int channel_id;
+    public long channel_id;
 
     /** 关联person表主键*/
     public long person_id;
 
     /** 代理人手机号*/
-    public long phone;
+    public String phone;
 
     /** 工号*/
-    public int job_num;
+    public String job_num;
 
     /** 职位表id*/
     public long position_id;
