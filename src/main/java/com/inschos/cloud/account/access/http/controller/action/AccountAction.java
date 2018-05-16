@@ -540,7 +540,7 @@ public class AccountAction extends BaseAction {
             }
         }
         if(list.isEmpty()){
-            return json(BaseResponse.CODE_FAILURE,"很抱歉，您的账号尚未生效，请联系业管处理", response);
+            return json(BaseResponse.CODE_AGENT_ACCOUNT_INVALID,"很抱歉，您的账号尚未生效，请联系业管处理", response);
         }else{
             response.data = list;
             return json(BaseResponse.CODE_SUCCESS,"获取成功", response);
