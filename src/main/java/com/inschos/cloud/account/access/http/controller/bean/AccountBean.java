@@ -188,7 +188,7 @@ public class AccountBean {
 
         public String token;
 
-        public String needManager;
+        public int needManager;
 
 
     }

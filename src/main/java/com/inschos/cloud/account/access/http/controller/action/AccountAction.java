@@ -118,9 +118,9 @@ public class AccountAction extends BaseAction {
                         if(list.size()==1){
                             managerUuid = list.get(0).account_uuid;
                         }else if(list.size()>1){
-                            tokenData.needManager = "1";
+                            tokenData.needManager = 1;
                         }else{
-                            return json(BaseResponse.CODE_FAILURE,"很抱歉，您的账号尚未生效，请联系业管处理", response);
+                            tokenData.needManager = 1;
                         }
                         break;
                 }
