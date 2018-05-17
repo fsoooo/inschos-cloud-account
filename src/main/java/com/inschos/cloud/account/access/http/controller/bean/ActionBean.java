@@ -31,6 +31,7 @@ public class ActionBean {
 
 	public String referer;
 
+
 	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@verifyToken");
 
 	public static String getSalt(String salt) {

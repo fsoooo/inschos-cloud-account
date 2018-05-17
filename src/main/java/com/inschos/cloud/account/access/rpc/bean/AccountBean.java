@@ -5,6 +5,10 @@ package com.inschos.cloud.account.access.rpc.bean;
  */
 public class AccountBean {
 
+    public int code;
+
+    public String message;
+
     /** 所属业管uuid*/
     public String managerUuid;
 
