@@ -69,25 +69,8 @@ public class AccountAction extends BaseAction {
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
 
-        Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_USERNAME);
-        switch (accountType){
-            case Account.TYPE_CUST_USER:
-                if(account==null){
-                    account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_PHONE);
-                }
-                break;
-            case Account.TYPE_CUST_COM:
-                if(account==null){
-                    account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_EMAIL);
-                }
-                break;
-            case Account.TYPE_AGENT:
-                if(account==null){
-                    account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_PHONE);
-                }
-                break;
+        Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.getAccountFiled(request.method));
 
-        }
         if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
 
 
@@ -174,42 +157,34 @@ public class AccountAction extends BaseAction {
         }
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
+        int accountFiled = Account.getAccountFiled(request.method);
+        boolean checkOk = false;
+        switch (accountFiled){
+            case Account.ACCOUNT_FILED_USERNAME:
+                checkOk = false;
+                break;
+            case Account.ACCOUNT_FILED_EMAIL:
+                checkOk = checkToken!=null && "mail".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
+                break;
+            case Account.ACCOUNT_FILED_PHONE:
+                checkOk = checkToken!=null && "sms".equals(checkToken.method) && request.username.equals(checkToken.verifyName);;
+                break;
+        }
 
-        if(checkToken!=null){
+        if(checkOk){
 
-            String password = request.password.trim();
+            String password = request.password;
             String salt = StringKit.randStr(6);
             boolean accountNameExsitFlag = false;
             String errMsg = null;
 
-            Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.ACCOUNT_FILED_USERNAME);
+            Account account = accountDao.findByAccount(system.id,request.username, accountType, accountFiled);
 
             if(account!=null){
-                errMsg = "用户名已存在";
+                errMsg = "用户已存在";
                 accountNameExsitFlag = true;
             }
-            String phone = null;
-            String email = null;
-            if(!accountNameExsitFlag){
-                switch (checkToken.method){
-                    case "sms":
-                        account = accountDao.findByAccount(system.id,checkToken.verifyName, accountType, Account.ACCOUNT_FILED_PHONE);
-                        if(account!=null){
-                            errMsg = "手机号已注册";
-                            accountNameExsitFlag = true;
-                        }
-                        phone = checkToken.verifyName;
-                        break;
-                    case "mail":
-                        account = accountDao.findByAccount(system.id,checkToken.verifyName, accountType, Account.ACCOUNT_FILED_EMAIL);
-                        if(account!=null){
-                            errMsg = "邮箱地址已注册";
-                            accountNameExsitFlag = true;
-                        }
-                        email = checkToken.verifyName;
-                        break;
-                }
-            }
+
 
             int resultAdd = 0;
             int custType = 0;
@@ -219,7 +194,7 @@ public class AccountAction extends BaseAction {
                 switch (accountType){
                     case Account.TYPE_CUST_USER: {
                         PersonBean personBean = new PersonBean();
-                        personBean.phone = phone;
+                        personBean.phone = request.username;
                         personBean.cust_type = PersonBean.CUST_TYPE_USER;
                         int resultId = personClient.saveInfo(personBean);
                         if (resultId > 0) {
@@ -230,7 +205,7 @@ public class AccountAction extends BaseAction {
                     }
                     case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
-                        companyBean.email = email;
+                        companyBean.email = request.username;
                         long resultId = companyClient.addCompany(companyBean,accountUuid);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
@@ -241,7 +216,7 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_AGENT:
                     {
                         PersonBean personBean = new PersonBean();
-                        personBean.phone = phone;
+                        personBean.phone = request.username;
                         personBean.cust_type = PersonBean.CUST_TYPE_AGENT;
 
                         long resultId = 0;
@@ -253,7 +228,7 @@ public class AccountAction extends BaseAction {
                         AgentJobBean agentPerson = null;
                         if(accountList!=null && !accountList.isEmpty()){
                             List<String> list = ListKit.toColumnList(accountList, v -> v.account_uuid);
-                            agentPerson = agentJobClient.getAgentPersonId(phone, list);
+                            agentPerson = agentJobClient.getAgentPersonId(request.username, list);
                         }
                         if(agentPerson==null){
                             resultId = personClient.saveInfo(personBean);
@@ -274,9 +249,17 @@ public class AccountAction extends BaseAction {
                     addRecord.account_uuid = accountUuid;
                     addRecord.status = Account.STATUS_NORMAL;
                     addRecord.password = Account.generatePwd(password,salt);
-                    addRecord.username = request.username;
-                    addRecord.phone = phone;
-                    addRecord.email = email;
+                    switch (accountFiled){
+                        case Account.ACCOUNT_FILED_USERNAME:
+                            addRecord.username = request.username;
+                            break;
+                        case Account.ACCOUNT_FILED_EMAIL:
+                            addRecord.phone = request.username;
+                            break;
+                        case Account.ACCOUNT_FILED_PHONE:
+                            addRecord.email = request.username;
+                            break;
+                    }
                     addRecord.user_type = accountType;
                     addRecord.user_id = userId;
                     addRecord.salt = salt;
@@ -297,7 +280,6 @@ public class AccountAction extends BaseAction {
                         }
                     }
                 }
-
             }
 
             if(resultAdd>0){

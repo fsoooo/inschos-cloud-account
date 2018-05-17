@@ -113,5 +113,24 @@ public class Account implements Serializable{
         return accountType;
     }
 
+    public static int getAccountFiled(String method){
+        int filedType = 0;
+        if(!StringKit.isEmpty(method)){
+            switch (method){
+                case "name":
+                    filedType = ACCOUNT_FILED_USERNAME;
+                    break;
+                case "phone":
+                    filedType = ACCOUNT_FILED_PHONE;
+                    break;
+                case "email":
+                    filedType = ACCOUNT_FILED_EMAIL;
+                    break;
+            }
+        }
+        return filedType;
+
+    }
+
 
 }

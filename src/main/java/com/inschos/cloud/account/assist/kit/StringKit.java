@@ -213,7 +213,7 @@ public class StringKit {
 	 * @return
 	 */
 	public static String formatFloat(float input, int fraction) {
-		BigDecimal value = new BigDecimal(input).setScale(fraction, BigDecimal.ROUND_DOWN).stripTrailingZeros();
+		BigDecimal value = new BigDecimal(String.valueOf(input)).setScale(fraction, BigDecimal.ROUND_FLOOR).stripTrailingZeros();
 		if (value.compareTo(BigDecimal.ZERO) == 0) {
 			return "0";
 		} else {

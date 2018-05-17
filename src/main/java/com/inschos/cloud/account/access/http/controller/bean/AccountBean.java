@@ -17,6 +17,9 @@ public class AccountBean {
         @ParamCheckAnnotation(name = "密码",isCheckEmpty = true)
         public String password ;
 
+        @ParamCheckAnnotation(name = "登录方式",isCheckEmpty = true)
+        public String method ;
+
     }
 
     public static class LoginResponse extends BaseResponse{
@@ -31,6 +34,9 @@ public class AccountBean {
 
         @ParamCheckAnnotation(name = "密码",isCheckEmpty = true,isCheckMinLength = 6,isCheckMaxLength = 20)
         public String password;
+
+        @ParamCheckAnnotation(name = "注册方式",isCheckEmpty = true)
+        public String method ;
 
 //        @ParamCheckAnnotation(name = "验证码",isCheckEmpty = true)
 //        public String code;
