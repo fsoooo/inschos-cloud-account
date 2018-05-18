@@ -121,13 +121,13 @@ public class AccountAction extends BaseAction {
                     response.data.token = token;
                     return json(BaseResponse.CODE_SUCCESS,"登录成功", response);
                 }else{
-                    return json(BaseResponse.CODE_FAILURE,"请输入正确的登录密码", response);
+                    return json(BaseResponse.CODE_FAILURE,"请输入正确的用户名或密码", response);
                 }
             }else{
                 return json(BaseResponse.CODE_FAILURE,"账号异常，请联系管理员", response);
             }
         }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的登录密码", response);
+            return json(BaseResponse.CODE_FAILURE,"请输入正确的用户名或密码", response);
         }
     }
 
