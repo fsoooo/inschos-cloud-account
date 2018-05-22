@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService{
                 accountBean = toBean(account);
                 accountBean.managerUuid = actionBean.managerUuid;
                 if(accountBean.userType==Account.TYPE_AGENT && StringKit.isEmpty(accountBean.managerUuid)){
-                    code = 502;
+                    code = 504;
                     message = "未选择业管";
                 }else{
                     code = 200;

@@ -74,7 +74,7 @@ public class AccountAction extends BaseAction {
         if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
 
 
-
+            boolean needManage = false;
             if(account.status==Account.STATUS_NORMAL){
 
                 TokenData tokenData = new TokenData();
@@ -100,10 +100,10 @@ public class AccountAction extends BaseAction {
                         List<Account> list = getExistsManagerUuid(account.user_id, system.id);
                         if(list.size()==1){
                             managerUuid = list.get(0).account_uuid;
-                        }else if(list.size()>1){
-                            tokenData.needManager = 1;
+//                        }else if(list.size()>1){
+//                            tokenData.needManager = 1;
                         }else{
-                            tokenData.needManager = 1;
+                            needManage = true;
                         }
                         break;
                 }
@@ -119,7 +119,11 @@ public class AccountAction extends BaseAction {
                 if(!StringKit.isEmpty(token)){
                     response.data = tokenData;
                     response.data.token = token;
-                    return json(BaseResponse.CODE_SUCCESS,"登录成功", response);
+                    if(needManage){
+                        return json( BaseResponse.CODE_NEED_CHOOSE_MANAGER,"请选择业管", response);
+                    }else{
+                        return json( BaseResponse.CODE_SUCCESS,"登录成功", response);
+                    }
                 }else{
                     return json(BaseResponse.CODE_FAILURE,"请输入正确的用户名或密码", response);
                 }

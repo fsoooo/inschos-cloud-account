@@ -14,5 +14,6 @@ public class BaseResponse {
 	public static final int CODE_VERSION_FAILURE = 501;
 	public static final int CODE_ACCESS_FAILURE = 502;
 	public static final int CODE_AGENT_ACCOUNT_INVALID = 503;
+	public static final int CODE_NEED_CHOOSE_MANAGER = 504;
 
 }
