@@ -258,10 +258,10 @@ public class AccountAction extends BaseAction {
                             addRecord.username = request.username;
                             break;
                         case Account.ACCOUNT_FILED_EMAIL:
-                            addRecord.phone = request.username;
+                            addRecord.email = request.username;
                             break;
                         case Account.ACCOUNT_FILED_PHONE:
-                            addRecord.email = request.username;
+                            addRecord.phone = request.username;
                             break;
                     }
                     addRecord.user_type = accountType;
