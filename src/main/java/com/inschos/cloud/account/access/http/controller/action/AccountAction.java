@@ -14,10 +14,7 @@ import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.data.dao.AccountVerifyDao;
 import com.inschos.cloud.account.data.dao.PlatformSystemDao;
 import com.inschos.cloud.account.extend.worker.AccountUuidWorker;
-import com.inschos.cloud.account.model.Account;
-import com.inschos.cloud.account.model.AccountVerify;
-import com.inschos.cloud.account.model.Common;
-import com.inschos.cloud.account.model.PlatformSystem;
+import com.inschos.cloud.account.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +72,7 @@ public class AccountAction extends BaseAction {
 
 
             boolean needManage = false;
+            boolean isBind = false;
             if(account.status==Account.STATUS_NORMAL){
 
                 TokenData tokenData = new TokenData();
@@ -96,14 +94,24 @@ public class AccountAction extends BaseAction {
                         break;
                     case Account.TYPE_AGENT:
 
+                        AccountDefault accountDefault = accountDao.findAccountDefault(account.account_uuid);
+                        if(accountDefault!=null){
+                            AgentJobBean jobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(accountDefault.manager_uuid, Long.valueOf(account.user_id));
+                            if(jobBean!=null){
+                                isBind = true;
+                                managerUuid = accountDefault.manager_uuid;
+                            }
+                        }
+                        if(!isBind){
 
-                        List<Account> list = getExistsManagerUuid(account.user_id, system.id);
-                        if(list.size()==1){
-                            managerUuid = list.get(0).account_uuid;
+                            List<Account> list = getExistsManagerUuid(account.user_id, system.id);
+                            if(list.size()==1){
+                                managerUuid = list.get(0).account_uuid;
 //                        }else if(list.size()>1){
 //                            tokenData.needManager = 1;
-                        }else{
-                            needManage = true;
+                            }else{
+                                needManage = true;
+                            }
                         }
                         break;
                 }
@@ -114,6 +122,9 @@ public class AccountAction extends BaseAction {
                 account.updated_at = timeMillis;
                 if(accountDao.updateTokenByUuid(account)>0){
                     token = account.token;
+                    if(!isBind && !needManage){
+                        bindAgent(account.account_uuid,account.phone,managerUuid,account.user_id);
+                    }
                 }
 
                 if(!StringKit.isEmpty(token)){
@@ -225,20 +236,7 @@ public class AccountAction extends BaseAction {
 
                         long resultId = 0;
 
-                        Account searchListSysType = new Account();
-                        searchListSysType.user_type = Account.TYPE_COMPANY;
-                        searchAManager.sys_id = system.id;
-                        List<Account> accountList = accountDao.findListBySysType(searchListSysType);
-                        AgentJobBean agentPerson = null;
-                        if(accountList!=null && !accountList.isEmpty()){
-                            List<String> list = ListKit.toColumnList(accountList, v -> v.account_uuid);
-                            agentPerson = agentJobClient.getAgentPersonId(request.username, list);
-                        }
-                        if(agentPerson==null){
-                            resultId = personClient.saveInfo(personBean);
-                        }else{
-                            resultId = agentPerson.person_id;
-                        }
+                        resultId = personClient.saveInfo(personBean);
 
                         if(resultId>0){
                             userId = String.valueOf(resultId);
@@ -559,6 +557,7 @@ public class AccountAction extends BaseAction {
             account.account_uuid = bean.accountUuid;
             if(accountDao.updateTokenByUuid(account)>0){
                 token = account.token;
+                bindAgent(account.account_uuid,account.phone,bean.managerUuid,account.user_id);
             }
             if(!StringKit.isEmpty(token)){
                 response.data = new TokenData();
@@ -821,24 +820,40 @@ public class AccountAction extends BaseAction {
 
     }
 
-    private List<Account> getExistsManagerUuid(String userId,long sysId){
-        List<AgentJobBean> agents = agentJobClient.getAgents(Long.valueOf(userId));
-        List<Account> exists = new ArrayList<>();
-        if(agents!=null){
-            Account searchManagers = new Account();
-            searchManagers.sys_id = sysId;
-            searchManagers.user_type = Account.TYPE_COMPANY;
-            List<Account> accounts = accountDao.findListBySysType(searchManagers);
-            List<String> columnList = ListKit.toColumnList(agents, v -> v.manager_uuid);
+    private List<Account> getExistsManagerUuid(String phone,long sysId){
+        Account searchManagers = new Account();
+        searchManagers.sys_id = sysId;
+        searchManagers.user_type = Account.TYPE_COMPANY;
+        List<Account> accounts = accountDao.findListBySysType(searchManagers);
 
-            for (Account account : accounts) {
-                if(columnList.indexOf(account.account_uuid)>-1){
-                    exists.add(account);
+        List<Account> exists = new ArrayList<>();
+
+        if(accounts!=null){
+            List<String> columnList = ListKit.toColumnList(accounts, v -> v.account_uuid);
+            List<AgentJobBean> beanList = agentJobClient.getAgentPersonId(phone, columnList);
+            if(beanList!=null && !beanList.isEmpty()){
+                List<String> columnList1 = ListKit.toColumnList(beanList, v -> v.manager_uuid);
+                for (Account account : accounts) {
+                    if(columnList1.contains(account.account_uuid)){
+                        exists.add(account);
+                    }
                 }
             }
         }
         return exists;
     }
+
+
+    private int bindAgent(String accountUuid,String phone,String managerUuid,String userId){
+
+        AccountDefault aDefault = new AccountDefault();
+        aDefault.account_uuid = accountUuid;
+        aDefault.manager_uuid = managerUuid;
+        aDefault.updated_at = TimeKit.currentTimeMillis();
+        accountDao.addOrUpdate(aDefault);
+        return agentJobClient.bindPerson(phone,managerUuid,Long.valueOf(userId));
+    }
+
 
 
 

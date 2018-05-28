@@ -12,5 +12,12 @@ public interface AgentJobService {
     List<AgentJobBean> getAgentManagers(long personId);
 
 
-    AgentJobBean getAgentPersonInfo(String phone,List<String> managerUuids);
+    List<AgentJobBean> getAgents(String phone, List<String> managerUuids);
+
+    AgentJobBean getAgentInfoByPersonIdManagerUuid(String managerUuid,long personId);
+
+    int bindPerson(String phone,String managerUuid,long personId);
+
+
+
 }

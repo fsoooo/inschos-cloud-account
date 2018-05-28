@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inschos.cloud.account.data.mapper.AccountDefaultMapper">
+
+    <sql id="Base_Column_List">
+        `id`,`account_uuid`,`manager_uuid`,`created_at`,`updated_at`
+    </sql>
+
+    <insert id="insert" parameterType="AccountDefault">
+        insert ignore into account_default(`account_uuid`,`manager_uuid`,`created_at`,`updated_at`)
+        values(
+          #{account_uuid},#{manager_uuid},#{created_at},#{updated_at}
+        )
+    </insert>
+
+    <update id="update" parameterType="AccountDefault">
+        update account_default set
+          `account_uuid`=#{account_uuid},`manager_uuid`=#{manager_uuid},`created_at`=#{created_at},`updated_at`=#{updated_at}
+        where `id`=#{id}
+    </update>
+
+    <select id="selectOne" parameterType="long" resultType="AccountDefault">
+        select
+        <include refid="Base_Column_List"/>
+        from account_default
+        where `id`=#{id}
+    </select>
+
+    <select id="selectOneByAccount" parameterType="String" resultType="AccountDefault">
+        select
+        <include refid="Base_Column_List"/>
+        from account_default
+        where `account_uuid`=#{account_uuid}
+    </select>
+
+</mapper>

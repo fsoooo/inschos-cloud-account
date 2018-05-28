@@ -1,8 +1,11 @@
 package com.inschos.cloud.account.data.dao;
 
 import com.inschos.cloud.account.assist.kit.StringKit;
+import com.inschos.cloud.account.assist.kit.TimeKit;
+import com.inschos.cloud.account.data.mapper.AccountDefaultMapper;
 import com.inschos.cloud.account.data.mapper.AccountMapper;
 import com.inschos.cloud.account.model.Account;
+import com.inschos.cloud.account.model.AccountDefault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +20,8 @@ public class AccountDao {
 
     @Autowired
     private AccountMapper accountMapper;
+    @Autowired
+    private AccountDefaultMapper accountDefaultMapper;
 
     /**
      *
@@ -81,5 +86,24 @@ public class AccountDao {
         return !StringKit.isEmpty(accountUuid)?accountMapper.findByUuid(accountUuid):null;
     }
 
+    public AccountDefault findAccountDefault(String accountUuid){
+        return StringKit.isEmpty(accountUuid)?null:accountDefaultMapper.selectOneByAccount(accountUuid);
+    }
+
+    public int addOrUpdate(AccountDefault accountDefault){
+        int flag = 0;
+        if(accountDefault!=null){
+            AccountDefault oldDefault = accountDefaultMapper.selectOneByAccount(accountDefault.account_uuid);
+            if(oldDefault!=null){
+                oldDefault.manager_uuid = accountDefault.manager_uuid;
+                oldDefault.updated_at = accountDefault.updated_at;
+                flag = accountDefaultMapper.update(oldDefault);
+            }else{
+                accountDefault.created_at = TimeKit.currentTimeMillis();
+                flag = accountDefaultMapper.insert(accountDefault);
+            }
+        }
+        return flag;
+    }
 
 }

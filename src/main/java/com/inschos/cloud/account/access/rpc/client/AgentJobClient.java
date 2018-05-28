@@ -34,15 +34,35 @@ public class AgentJobClient {
         }
     }
 
-    public AgentJobBean getAgentPersonId(String phone,List<String> manageUuids) {
+    public List<AgentJobBean> getAgentPersonId(String phone,List<String> manageUuids) {
 //        long personId = 0;
         try{
             AgentJobService service = getService();
-            return service.getAgentPersonInfo(phone,manageUuids);
+            return service.getAgents(phone,manageUuids);
         }catch(Exception e){
             L.log.error("rpc error {}",e.getMessage(),e);
         }
         return null;
     }
+    public int bindPerson(String phone,String managerUuid,long personId) {
+//        long personId = 0;
+        try{
+            AgentJobService service = getService();
+            return service.bindPerson(phone,managerUuid,personId);
+        }catch(Exception e){
+            L.log.error("rpc error {}",e.getMessage(),e);
+        }
+        return 0;
+    }
+    public AgentJobBean getAgentInfoByPersonIdManagerUuid(String managerUuid,long personId) {
+        try{
+            AgentJobService service = getService();
+            return service.getAgentInfoByPersonIdManagerUuid(managerUuid,personId);
+        }catch(Exception e){
+            L.log.error("rpc error {}",e.getMessage(),e);
+        }
+        return null;
+    }
+
 
 }
