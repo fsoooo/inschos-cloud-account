@@ -104,7 +104,7 @@ public class AccountAction extends BaseAction {
                         }
                         if(!isBind){
 
-                            List<Account> list = getExistsManagerUuid(account.user_id, system.id);
+                            List<Account> list = getExistsManagerUuid(account.phone, system.id);
                             if(list.size()==1){
                                 managerUuid = list.get(0).account_uuid;
 //                        }else if(list.size()>1){
@@ -512,7 +512,7 @@ public class AccountAction extends BaseAction {
         Account account = accountDao.findByUuid(bean.accountUuid);
         if(account!=null){
 
-            List<Account> listManager = getExistsManagerUuid(account.user_id, bean.sysId);
+            List<Account> listManager = getExistsManagerUuid(account.phone, bean.sysId);
             for (Account at : listManager) {
                 CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(at.user_id));
                 if(companyBean!=null){
@@ -542,7 +542,7 @@ public class AccountAction extends BaseAction {
         boolean isVaild = false;
         Account accountU = accountDao.findByUuid(bean.accountUuid);
         if(accountU!=null){
-            List<Account> listManager = getExistsManagerUuid(accountU.user_id, bean.sysId);
+            List<Account> listManager = getExistsManagerUuid(accountU.phone, bean.sysId);
             List<String> columnList = ListKit.toColumnList(listManager, v -> v.account_uuid);
             isVaild =columnList.indexOf(request.managerUuid)>-1;
         }
