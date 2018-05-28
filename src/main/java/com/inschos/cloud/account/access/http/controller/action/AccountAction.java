@@ -557,7 +557,7 @@ public class AccountAction extends BaseAction {
             account.account_uuid = bean.accountUuid;
             if(accountDao.updateTokenByUuid(account)>0){
                 token = account.token;
-                bindAgent(account.account_uuid,account.phone,bean.managerUuid,account.user_id);
+                bindAgent(accountU.account_uuid,accountU.phone,bean.managerUuid,accountU.user_id);
             }
             if(!StringKit.isEmpty(token)){
                 response.data = new TokenData();
