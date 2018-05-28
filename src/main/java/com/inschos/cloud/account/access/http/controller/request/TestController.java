@@ -56,7 +56,7 @@ public class TestController {
 
         ArrayList<String> list = new ArrayList<>();
         list.add("2");
-        AgentJobBean agentPersonId = agentJobClient.getAgentPersonId("2", list);
+
         List<AgentJobBean> agents = agentJobClient.getAgents(2);
 
 
