@@ -850,8 +850,10 @@ public class AccountAction extends BaseAction {
         aDefault.account_uuid = accountUuid;
         aDefault.manager_uuid = managerUuid;
         aDefault.updated_at = TimeKit.currentTimeMillis();
-        accountDao.addOrUpdate(aDefault);
-        return agentJobClient.bindPerson(phone,managerUuid,Long.valueOf(userId));
+        if(agentJobClient.bindPerson(phone,managerUuid,Long.valueOf(userId))>0){
+            accountDao.addOrUpdate(aDefault);
+        }
+        return 1;
     }
 
 

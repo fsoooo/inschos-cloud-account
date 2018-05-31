@@ -15,4 +15,7 @@ public interface AccountService {
     public AccountBean findByUuid(String uuid);
 
     public AccountBean findByAgentPhone(long sysId,String phone);
+
+    public AccountBean findByUser(long sysId,int userType,String userId);
+
 }

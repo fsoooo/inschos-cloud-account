@@ -58,6 +58,10 @@ public class AccountDao {
         return search!=null?accountMapper.findListBySysType(search):null;
     }
 
+    public Account findByUser(Account search){
+        return search!=null?accountMapper.findByUser(search):null;
+    }
+
     public int registry(Account account){
         return account!=null?accountMapper.insertRegistry(account):0;
     }

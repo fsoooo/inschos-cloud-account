@@ -78,6 +78,15 @@ public class AccountServiceImpl implements AccountService{
         return bean;
     }
 
+    @Override
+    public AccountBean findByUser(long sysId, int userType, String userId) {
+        Account account = new Account();
+        account.sys_id = sysId;
+        account.user_type = userType;
+        account.user_id = userId;
+        return toBean(accountDao.findByUser(account));
+    }
+
     private AccountBean toBean(Account account){
         AccountBean bean = null;
         if(account!=null){

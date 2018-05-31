@@ -35,4 +35,6 @@ public interface AccountMapper {
 
     public List<Account> findListBySysType(Account search);
 
+    Account findByUser(Account search);
+
 }
