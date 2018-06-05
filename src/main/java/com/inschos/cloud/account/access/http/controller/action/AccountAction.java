@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 ;
 
@@ -45,12 +46,14 @@ public class AccountAction extends BaseAction {
     private AgentJobClient agentJobClient;
     @Autowired
     private SmsHandingClient smsHandingClient;
+    @Autowired
+    private FileClient fileClient;
 
     private final long CODE_VALID_TIME = 10*60*1000L;
 
     private final long CODE_UNIQUE_TIME = 5*60*1000L;
 
-    private final long CODE_LIMIT_NO_RESEND_TIME = 60*1000l;
+    private final long CODE_LIMIT_NO_RESEND_TIME = 60*1000L;
 
     public String login(ActionBean bean,String requestAccountType){
         LoginRequest request = requst2Bean(bean.body, LoginRequest.class);
@@ -73,6 +76,7 @@ public class AccountAction extends BaseAction {
 
             boolean needManage = false;
             boolean isBind = false;
+            Account accountManager = null;
             if(account.status==Account.STATUS_NORMAL){
 
                 TokenData tokenData = new TokenData();
@@ -84,7 +88,7 @@ public class AccountAction extends BaseAction {
                         searchManager.sys_id =system.id;
                         searchManager.user_type = Account.TYPE_COMPANY;
                         // TODO: 2018/4/27  客户表  查询managerUuid
-                        Account accountManager = accountDao.findOneBySysType(searchManager);
+                        accountManager = accountDao.findOneBySysType(searchManager);
                         if(accountManager!=null){
                             managerUuid = accountManager.account_uuid;
                         }
@@ -96,10 +100,10 @@ public class AccountAction extends BaseAction {
 
                         AccountDefault accountDefault = accountDao.findAccountDefault(account.account_uuid);
                         if(accountDefault!=null){
-                            AgentJobBean jobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(accountDefault.manager_uuid, Long.valueOf(account.user_id));
-                            if(jobBean!=null){
+                            if(isValidAgent(accountDefault.manager_uuid,account.phone,account.user_id)){
                                 isBind = true;
                                 managerUuid = accountDefault.manager_uuid;
+                                accountManager = accountDao.findByUuid(managerUuid);
                             }
                         }
                         if(!isBind){
@@ -107,6 +111,7 @@ public class AccountAction extends BaseAction {
                             List<Account> list = getExistsManagerUuid(account.phone, system.id);
                             if(list.size()==1){
                                 managerUuid = list.get(0).account_uuid;
+                                accountManager = list.get(0);
 //                        }else if(list.size()>1){
 //                            tokenData.needManager = 1;
                             }else{
@@ -122,8 +127,20 @@ public class AccountAction extends BaseAction {
                 account.updated_at = timeMillis;
                 if(accountDao.updateTokenByUuid(account)>0){
                     token = account.token;
-                    if(!isBind && !needManage){
-                        bindAgent(account.account_uuid,account.phone,managerUuid,account.user_id);
+                    if(!isBind){
+
+                        if(accountManager!=null){
+                            CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
+                            if(companyBean!=null){
+                                tokenData.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+                                tokenData.compName = companyBean.name;
+                            }
+
+                        }
+
+                        if(!needManage){
+                            bindAgent(account.account_uuid,account.phone,managerUuid,account.user_id);
+                        }
                     }
                 }
 
@@ -539,15 +556,22 @@ public class AccountAction extends BaseAction {
         if(errMessage.hasError()){
             return json(BaseResponse.CODE_FAILURE,errMessage, response);
         }
-        boolean isVaild = false;
+        boolean isValid = false;
         Account accountU = accountDao.findByUuid(bean.accountUuid);
+        Account accountManager = null;
         if(accountU!=null){
             List<Account> listManager = getExistsManagerUuid(accountU.phone, bean.sysId);
-            List<String> columnList = ListKit.toColumnList(listManager, v -> v.account_uuid);
-            isVaild =columnList.indexOf(request.managerUuid)>-1;
+            if(listManager!=null){
+                Map<String, Account> accountMap = ListKit.toMap(listManager, v -> v.account_uuid);
+                if(accountMap.containsKey(request.managerUuid)){
+                    accountManager = accountMap.get(request.managerUuid);
+                    isValid = true;
+                }
+            }
+
         }
 
-        if(isVaild){
+        if(isValid){
             bean.managerUuid = request.managerUuid;
             String token = null;
             Account account = new Account();
@@ -560,7 +584,13 @@ public class AccountAction extends BaseAction {
                 bindAgent(accountU.account_uuid,accountU.phone,bean.managerUuid,accountU.user_id);
             }
             if(!StringKit.isEmpty(token)){
+
                 response.data = new TokenData();
+                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
+                if(companyBean!=null){
+                    response.data.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+                    response.data.compName = companyBean.name;
+                }
                 response.data.token = token;
                 return json(BaseResponse.CODE_SUCCESS,"企业切换成功", response);
             }else{
@@ -830,7 +860,7 @@ public class AccountAction extends BaseAction {
 
         if(accounts!=null){
             List<String> columnList = ListKit.toColumnList(accounts, v -> v.account_uuid);
-            List<AgentJobBean> beanList = agentJobClient.getAgentPersonId(phone, columnList);
+            List<AgentJobBean> beanList = agentJobClient.getInviteAgents(phone, columnList);
             if(beanList!=null && !beanList.isEmpty()){
                 List<String> columnList1 = ListKit.toColumnList(beanList, v -> v.manager_uuid);
                 for (Account account : accounts) {
@@ -856,6 +886,15 @@ public class AccountAction extends BaseAction {
         return 1;
     }
 
+    private boolean isValidAgent(String managerUuid,String phone,String userId){
+        boolean isOk = false;
+        AgentJobBean agentJobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(managerUuid, Long.valueOf(userId));
+        if(agentJobBean!=null ){
+            isOk = true;
+
+        }
+        return isOk;
+    }
 
 
 

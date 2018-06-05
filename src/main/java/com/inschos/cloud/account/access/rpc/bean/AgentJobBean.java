@@ -30,10 +30,12 @@ public class AgentJobBean {
     public String note;
 
     /** 入职时间*/
-    public long start_time;
+    public long entry_time;
 
     /** 离职时间*/
-    public long end_time;
+    public long out_time;
+
+    public int bind_status;
 
 
 }

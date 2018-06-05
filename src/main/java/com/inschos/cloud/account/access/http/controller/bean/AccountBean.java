@@ -194,8 +194,9 @@ public class AccountBean {
 
         public String token;
 
-        public int needManager;
+        public String compName;
 
+        public String compLogo;
 
     }
 

@@ -2,9 +2,12 @@ package com.inschos.cloud.account.access.rpc.service.impl;
 
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.rpc.bean.AccountBean;
+import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
+import com.inschos.cloud.account.access.rpc.client.AgentJobClient;
 import com.inschos.cloud.account.access.rpc.service.AccountService;
 import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
+import com.inschos.cloud.account.assist.kit.TimeKit;
 import com.inschos.cloud.account.data.dao.AccountDao;
 import com.inschos.cloud.account.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,8 @@ public class AccountServiceImpl implements AccountService{
 
     @Autowired
     private AccountDao accountDao;
+    @Autowired
+    private AgentJobClient agentJobClient;
 
     @Override
     public AccountBean getAccount(String token) {
@@ -33,9 +38,22 @@ public class AccountServiceImpl implements AccountService{
             if(token!=null && account!=null && ActionBean.getSalt(account.salt).equals(actionBean.salt)){
                 accountBean = toBean(account);
                 accountBean.managerUuid = actionBean.managerUuid;
-                if(accountBean.userType==Account.TYPE_AGENT && StringKit.isEmpty(accountBean.managerUuid)){
-                    code = 504;
-                    message = "未选择业管";
+                //代理人判断
+                if(accountBean.userType==Account.TYPE_AGENT){
+                    if(StringKit.isEmpty(accountBean.managerUuid)){
+                        code = 504;
+                        message = "未选择业管";
+                    }else{
+                        AgentJobBean agentJobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(accountBean.managerUuid, Long.valueOf(accountBean.userId));
+                        if(agentJobBean!=null ){
+                            code = 200;
+                            message = "登录验证成功";
+                        }else{
+                            code = 502;
+                            message = "登录验证失败";
+                        }
+                    }
+
                 }else{
                     code = 200;
                     message = "登录验证成功";
