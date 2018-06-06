@@ -44,10 +44,19 @@ public class AccountServiceImpl implements AccountService{
                         code = 504;
                         message = "未选择业管";
                     }else{
-                        AgentJobBean agentJobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(accountBean.managerUuid, Long.valueOf(accountBean.userId));
+                        AgentJobBean agentJobBean = agentJobClient.getAgentInfoInAndOut(accountBean.managerUuid, account.phone);
                         if(agentJobBean!=null ){
-                            code = 200;
-                            message = "登录验证成功";
+                            if(agentJobBean.out_time< TimeKit.currentTimeMillis()){
+                                if(agentJobBean.bind_status == 1){
+                                    agentJobClient.unBindPerson(account.phone,accountBean.managerUuid,Long.valueOf(account.user_id));
+                                }
+                                code = 502;
+                                message = "已离职";
+                            }else{
+                                code = 200;
+                                message = "登录验证成功";
+                            }
+
                         }else{
                             code = 502;
                             message = "登录验证失败";

@@ -16,6 +16,8 @@ public interface AgentJobService {
 
     AgentJobBean getAgentInfoByPersonIdManagerUuid(String managerUuid,long personId);
 
+    AgentJobBean getAgentInfoInAndOut(String managerUuid,String phone);
+
     int bindPerson(String phone,String managerUuid,long personId);
 
     int unBindPerson(String phone,String managerUuid,long personId);

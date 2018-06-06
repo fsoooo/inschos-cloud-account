@@ -100,7 +100,7 @@ public class AccountAction extends BaseAction {
 
                         AccountDefault accountDefault = accountDao.findAccountDefault(account.account_uuid);
                         if(accountDefault!=null){
-                            if(isValidAgent(accountDefault.manager_uuid,account.phone,account.user_id)){
+                            if(isValidAgent(accountDefault.manager_uuid,account.phone,account.user_id)>0){
                                 isBind = true;
                                 managerUuid = accountDefault.manager_uuid;
                                 accountManager = accountDao.findByUuid(managerUuid);
@@ -565,7 +565,16 @@ public class AccountAction extends BaseAction {
                 Map<String, Account> accountMap = ListKit.toMap(listManager, v -> v.account_uuid);
                 if(accountMap.containsKey(request.managerUuid)){
                     accountManager = accountMap.get(request.managerUuid);
-                    isValid = true;
+                    if(accountU.user_type==Account.TYPE_AGENT){
+                        int validAgent = isValidAgent(accountU.phone, request.managerUuid, accountU.user_id);
+                        if(validAgent==-1){
+                            return json(BaseResponse.CODE_FAILURE,"不能选择已离职的业管", response);
+                        }else{
+                            isValid = validAgent>0;
+                        }
+                    }else{
+                        isValid = true;
+                    }
                 }
             }
 
@@ -886,14 +895,21 @@ public class AccountAction extends BaseAction {
         return 1;
     }
 
-    private boolean isValidAgent(String managerUuid,String phone,String userId){
-        boolean isOk = false;
-        AgentJobBean agentJobBean = agentJobClient.getAgentInfoByPersonIdManagerUuid(managerUuid, Long.valueOf(userId));
+    private int isValidAgent(String managerUuid,String phone,String userId){
+        int flag = 0;
+        AgentJobBean agentJobBean = agentJobClient.getAgentInfoInAndOut(managerUuid, phone);
         if(agentJobBean!=null ){
-            isOk = true;
+            if(agentJobBean.out_time<TimeKit.currentTimeMillis()){
+                flag = -1;
+                if(agentJobBean.bind_status == 1){
+                    agentJobClient.unBindPerson(phone,managerUuid,Long.valueOf(userId));
+                }
+            }else{
+                flag = 1;
+            }
 
         }
-        return isOk;
+        return flag;
     }
 
 

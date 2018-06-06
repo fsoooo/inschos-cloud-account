@@ -74,5 +74,15 @@ public class AgentJobClient {
         return null;
     }
 
+    public AgentJobBean getAgentInfoInAndOut(String managerUuid,String phone) {
+        try{
+            AgentJobService service = getService();
+            return service.getAgentInfoInAndOut(managerUuid,phone);
+        }catch(Exception e){
+            L.log.error("rpc error {}",e.getMessage(),e);
+        }
+        return null;
+    }
+
 
 }
