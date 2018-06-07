@@ -129,14 +129,14 @@ public class AccountAction extends BaseAction {
                     token = account.token;
                     if(!isBind){
 
-                        if(accountManager!=null){
-                            CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
-                            if(companyBean!=null){
-                                tokenData.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
-                                tokenData.compName = companyBean.name;
-                            }
-
-                        }
+//                        if(accountManager!=null){
+//                            CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
+//                            if(companyBean!=null){
+//                                tokenData.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+//                                tokenData.compName = companyBean.name;
+//                            }
+//
+//                        }
 
                         if(!needManage){
                             bindAgent(account.account_uuid,account.phone,managerUuid,account.user_id);
@@ -595,11 +595,11 @@ public class AccountAction extends BaseAction {
             if(!StringKit.isEmpty(token)){
 
                 response.data = new TokenData();
-                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
-                if(companyBean!=null){
-                    response.data.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
-                    response.data.compName = companyBean.name;
-                }
+//                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
+//                if(companyBean!=null){
+//                    response.data.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+//                    response.data.compName = companyBean.name;
+//                }
                 response.data.token = token;
                 return json(BaseResponse.CODE_SUCCESS,"企业切换成功", response);
             }else{
@@ -711,6 +711,27 @@ public class AccountAction extends BaseAction {
         return json(BaseResponse.CODE_SUCCESS,"成功退出", response);
     }
 
+    public String home(ActionBean bean){
+        boolean hasOneManager = false;
+        BaseResponse response = new BaseResponse();
+        HomeData homeData = new HomeData();
+        if(!StringKit.isEmpty(bean.managerUuid)){
+            Account account = accountDao.findByUuid(bean.accountUuid);
+            if(account!=null){
+                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(account.user_id));
+                if(companyBean!=null){
+                    hasOneManager =true;
+                    homeData.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+                    homeData.compName = companyBean.name;
+                }
+            }
+        }
+        if(!hasOneManager){
+
+        }
+        response.data = homeData;
+        return json(BaseResponse.CODE_SUCCESS,"获取成功",response);
+    }
 
     private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId,String salt){
         ActionBean loginAction = new ActionBean();

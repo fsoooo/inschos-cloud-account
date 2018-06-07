@@ -194,10 +194,13 @@ public class AccountBean {
 
         public String token;
 
+    }
+
+    public static class HomeData{
+
         public String compName;
 
         public String compLogo;
-
     }
 
     public static class VerifyTokenData{

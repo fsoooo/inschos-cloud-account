@@ -121,6 +121,11 @@ public class AccountController {
         return  accountAction.loginOut(bean);
     }
 
-
+    @GetActionBeanAnnotation(isCheckAccess = false)
+    @RequestMapping("/home")
+    @ResponseBody
+    public String home(ActionBean bean){
+        return  accountAction.home(bean);
+    }
 
 }
