@@ -92,8 +92,10 @@ public class AccountAction extends BaseAction {
                         if(accountManager!=null){
                             managerUuid = accountManager.account_uuid;
                         }
+                        isBind = true;
                         break;
                     case Account.TYPE_COMPANY:
+                        isBind = true;
                         managerUuid = account.account_uuid;
                         break;
                     case Account.TYPE_AGENT:
