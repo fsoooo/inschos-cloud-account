@@ -718,7 +718,7 @@ public class AccountAction extends BaseAction {
         BaseResponse response = new BaseResponse();
         HomeData homeData = new HomeData();
         if(!StringKit.isEmpty(bean.managerUuid)){
-            Account account = accountDao.findByUuid(bean.accountUuid);
+            Account account = accountDao.findByUuid(bean.managerUuid);
             if(account!=null){
                 CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(account.user_id));
                 if(companyBean!=null){
