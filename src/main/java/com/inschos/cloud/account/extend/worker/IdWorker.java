@@ -6,7 +6,7 @@ import com.inschos.cloud.account.assist.kit.TimeKit;
  * Created by IceAnt on 2018/3/30.
  */
 public class IdWorker {
-
+    //1523264416370L
     private final long twepoch = 1522478426016L;
     private final long workerIdBits = 5L;
     private final long dataCenterIdBits = 5L;

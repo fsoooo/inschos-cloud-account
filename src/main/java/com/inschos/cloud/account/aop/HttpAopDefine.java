@@ -8,6 +8,7 @@ import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
 import com.inschos.cloud.account.annotation.GetActionBeanAnnotation;
 import com.inschos.cloud.account.assist.kit.HttpKit;
 import com.inschos.cloud.account.assist.kit.JsonKit;
+import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -35,6 +36,9 @@ public class HttpAopDefine {
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
 			String referer = request.getHeader("referer");
+			String domain = request.getHeader("domain");
+
+			L.log.debug("checkAuth:{}",domain);
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
