@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Created by IceAnt on 2018/3/29.
  */
 @Controller
-@RequestMapping("/account")
+@RequestMapping("/web/account")
 public class AccountController {
     @Autowired
     private AccountAction accountAction;
