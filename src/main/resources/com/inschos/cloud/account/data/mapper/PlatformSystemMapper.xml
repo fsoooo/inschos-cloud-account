@@ -30,7 +30,7 @@
         select
         <include refid="Base_Column_List"/>
         from  platform_system
-        where `domain`=#{domain} and `state`=1
+        where find_in_set(#{domain},`domain`) and `state`=1 and status=1
     </select>
 
 </mapper>

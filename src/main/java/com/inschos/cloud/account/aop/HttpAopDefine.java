@@ -36,9 +36,8 @@ public class HttpAopDefine {
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
 			String referer = request.getHeader("referer");
-			String domain = request.getHeader("domain");
 
-			L.log.debug("checkAuth:{}",domain);
+			L.log.debug("checkAuth:{}",referer);
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
