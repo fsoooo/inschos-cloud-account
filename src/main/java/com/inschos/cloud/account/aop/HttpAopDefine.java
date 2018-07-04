@@ -35,9 +35,9 @@ public class HttpAopDefine {
 			String buildCode = request.getParameter(BaseRequest.FILEID_BUILDCODE);
 			String platform = request.getParameter(BaseRequest.FILEID_PLATFORM);
 			String apiCode = request.getParameter(BaseRequest.FILEID_APICODE);
-			String referer = request.getHeader("referer");
+			String domain = request.getHeader("Origin");
 
-			L.log.debug("checkAuth:{}",referer);
+			L.log.debug("checkAuth domain :{}",domain);
 
 //			if (!isValidVersion(buildCode, platform)) {
 //				response.code = BaseResponse.CODE_VERSION_FAILURE;
@@ -68,7 +68,7 @@ public class HttpAopDefine {
 			}
 			bean.platform = platform;
 			bean.url = request.getRequestURL().toString();
-			bean.referer = referer;
+			bean.domain = domain;
 
 			bean.body = HttpKit.readRequestBody(request);
 			if (StringKit.isEmpty(bean.body)) {

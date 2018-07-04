@@ -190,6 +190,16 @@ public class AccountBean {
 
     }
 
+    public static class JointLoginRequest{
+        @ParamCheckAnnotation(name = "",isCheckEmpty = true)
+        public String channel_code;
+        public String name;
+        public String phone;
+        public String email;
+        public String area;
+        public String address;
+    }
+
     public static class TokenData {
 
         public String token;

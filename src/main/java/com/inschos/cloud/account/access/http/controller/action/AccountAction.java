@@ -64,7 +64,7 @@ public class AccountAction extends BaseAction {
         }
         int accountType = Account.getAccountType(requestAccountType);
 
-        PlatformSystem system = _getChannelSystem(bean.referer);
+        PlatformSystem system = _getChannelSystem(bean.domain);
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
@@ -176,7 +176,7 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        PlatformSystem system = _getChannelSystem(bean.referer);
+        PlatformSystem system = _getChannelSystem(bean.domain);
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
@@ -229,7 +229,6 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_CUST_USER: {
                         PersonBean personBean = new PersonBean();
                         personBean.phone = request.username;
-                        personBean.cust_type = PersonBean.CUST_TYPE_USER;
                         int resultId = personClient.saveInfo(personBean);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
@@ -251,7 +250,6 @@ public class AccountAction extends BaseAction {
                     {
                         PersonBean personBean = new PersonBean();
                         personBean.phone = request.username;
-                        personBean.cust_type = PersonBean.CUST_TYPE_AGENT;
 
                         long resultId = 0;
 
@@ -363,7 +361,7 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        PlatformSystem system = _getChannelSystem(bean.referer);
+        PlatformSystem system = _getChannelSystem(bean.domain);
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
@@ -421,7 +419,7 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        PlatformSystem system = _getChannelSystem(bean.referer);
+        PlatformSystem system = _getChannelSystem(bean.domain);
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
@@ -478,7 +476,7 @@ public class AccountAction extends BaseAction {
 
         int accountType = Account.getAccountType(requestAccountType);
 
-        PlatformSystem system = _getChannelSystem(bean.referer);
+        PlatformSystem system = _getChannelSystem(bean.domain);
         if(system==null || system.status != PlatformSystem.STATUS_OK){
             return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
         }
@@ -728,12 +726,31 @@ public class AccountAction extends BaseAction {
                 }
             }
         }
-        if(!hasOneManager){
 
+        if(!hasOneManager){
+            // TODO: 2018/7/4
         }
         response.data = homeData;
         return json(BaseResponse.CODE_SUCCESS,"获取成功",response);
     }
+
+    public String jointLogin(ActionBean bean){
+        BaseResponse response = new BaseResponse();
+        JointLoginRequest request = requst2Bean(bean.body,JointLoginRequest.class);
+
+        ResponseMessage errMessage = checkParam(request);
+        if(errMessage.hasError()){
+            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        }
+
+
+
+        HomeData homeData = new HomeData();
+
+
+        return null;
+    }
+
 
     private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId,String salt){
         ActionBean loginAction = new ActionBean();

@@ -29,7 +29,7 @@ public class ActionBean {
 
 	public long tokenTime;
 
-	public String referer;
+	public String domain;
 
 
 	public static final RC4Kit rc4 = new RC4Kit("Inschos@2018@verifyToken");
