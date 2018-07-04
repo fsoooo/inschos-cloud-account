@@ -1,5 +1,6 @@
 package com.inschos.cloud.account.access.http.controller;
 
+import com.inschos.cloud.account.assist.kit.L;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -40,7 +41,11 @@ public class CommonInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        response.setHeader("Access-Control-Allow-Origin", "http://122.14.202.146:9111");
+        String host = request.getRemoteHost();
+        L.log.info("preHandle host:{}",host);
+        L.log.info("preHandle referer:{}",request.getHeader("referer"));
+
+        response.setHeader("Access-Control-Allow-Origin", host);
         response.setHeader("Access-Control-Allow-Methods", "*");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers",
