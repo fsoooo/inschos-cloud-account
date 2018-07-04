@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-	   xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:mvc="http://www.springframework.org/schema/mvc"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop
 		http://www.springframework.org/schema/aop/spring-aop.xsd
@@ -13,46 +13,65 @@
 		http://www.springframework.org/schema/mvc
 		http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<!-- 引入属性文件 -->
-	<context:property-placeholder location="classpath:config.properties" />
+    <!-- 引入属性文件 -->
+    <context:property-placeholder location="classpath:config.properties"/>
 
-	<aop:aspectj-autoproxy />
-	<mvc:annotation-driven >
-		<mvc:message-converters register-defaults="true">
-			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
-				<property name="writeAcceptCharset" value="false"/>
-				<property name="supportedMediaTypes">
-					<list>
-						<value>text/html;charset=UTF-8</value>
-						<value>application/json;charset=UTF-8</value>
-					</list>
-				</property>
-				<!--<property name="defaultCharset" value="UTF-8" />-->
-				<!--<constructor-arg value="UTF-8" />-->
-			</bean>
-		</mvc:message-converters>
-	</mvc:annotation-driven>
-
-	<!-- 自动扫描(自动注入) -->
-	<context:component-scan base-package="com.inschos.cloud.account.access.http.controller"
-		use-default-filters="false">
-		<context:include-filter type="annotation"
-			expression="org.springframework.stereotype.Controller" />
-	</context:component-scan>
+    <aop:aspectj-autoproxy/>
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="writeAcceptCharset" value="false"/>
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <!--<property name="defaultCharset" value="UTF-8" />-->
+                <!--<constructor-arg value="UTF-8" />-->
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
 
 
-	<!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
-	<!--<bean id="multipartResolver"-->
-		<!--class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
-		<!--&lt;!&ndash; 指定所上传文件的总大小不能超过50M。注意maxUploadSize属性的限制不是针对单个文件，而是所有文件的容量之和 &ndash;&gt;-->
-		<!--<property name="maxUploadSize" value="52428800" />-->
-	<!--</bean>-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!-- 进行拦截 /web 下的controller -->
+            <mvc:mapping path="/web/**"/>
 
-	<!--异常处理 -->
-	<bean id="exceptionResolver" class="com.inschos.cloud.account.exception.ExceptionHandler" />
+            <!-- 排除拦截 -->
+            <!--<mvc:exclude-mapping path="/" />-->
+
+            <bean class="com.inschos.cloud.account.access.http.controller.CommonInterceptor">
+                <!-- 排除拦截 -->
+                <property name="excludedUrls">
+                    <list>
+                        <value>/</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 自动扫描(自动注入) -->
+    <context:component-scan base-package="com.inschos.cloud.account.access.http.controller"
+                            use-default-filters="false">
+        <context:include-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
 
 
+    <!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
+    <!--<bean id="multipartResolver"-->
+    <!--class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+    <!--&lt;!&ndash; 指定所上传文件的总大小不能超过50M。注意maxUploadSize属性的限制不是针对单个文件，而是所有文件的容量之和 &ndash;&gt;-->
+    <!--<property name="maxUploadSize" value="52428800" />-->
+    <!--</bean>-->
 
-	<import resource="spring-hprose.xml" />
+    <!--异常处理 -->
+    <bean id="exceptionResolver" class="com.inschos.cloud.account.exception.ExceptionHandler"/>
+
+
+    <import resource="spring-hprose.xml"/>
 
 </beans>
