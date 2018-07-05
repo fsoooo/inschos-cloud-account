@@ -49,47 +49,47 @@ public class AccountAction extends BaseAction {
     @Autowired
     private FileClient fileClient;
 
-    private final long CODE_VALID_TIME = 10*60*1000L;
+    private final long CODE_VALID_TIME = 10 * 60 * 1000L;
 
-    private final long CODE_UNIQUE_TIME = 5*60*1000L;
+    private final long CODE_UNIQUE_TIME = 5 * 60 * 1000L;
 
-    private final long CODE_LIMIT_NO_RESEND_TIME = 60*1000L;
+    private final long CODE_LIMIT_NO_RESEND_TIME = 60 * 1000L;
 
-    public String login(ActionBean bean,String requestAccountType){
+    public String login(ActionBean bean, String requestAccountType) {
         LoginRequest request = requst2Bean(bean.body, LoginRequest.class);
         LoginResponse response = new LoginResponse();
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
         int accountType = Account.getAccountType(requestAccountType);
 
         PlatformSystem system = _getChannelSystem(bean.domain);
-        if(system==null || system.status != PlatformSystem.STATUS_OK){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (system == null || system.status != PlatformSystem.STATUS_OK) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 
-        Account account = accountDao.findByAccount(system.id,request.username, accountType, Account.getAccountFiled(request.method));
+        Account account = accountDao.findByAccount(system.id, request.username, accountType, Account.getAccountFiled(request.method));
 
-        if(account!=null && account.password.equals(Account.generatePwd(request.password,account.salt))){
+        if (account != null && account.password.equals(Account.generatePwd(request.password, account.salt))) {
 
 
             boolean needManage = false;
             boolean isBind = false;
             Account accountManager = null;
-            if(account.status==Account.STATUS_NORMAL){
+            if (account.status == Account.STATUS_NORMAL) {
 
                 TokenData tokenData = new TokenData();
                 String managerUuid = null;
-                switch (accountType){
+                switch (accountType) {
                     case Account.TYPE_CUST_USER:
                     case Account.TYPE_CUST_COM:
                         Account searchManager = new Account();
-                        searchManager.sys_id =system.id;
+                        searchManager.sys_id = system.id;
                         searchManager.user_type = Account.TYPE_COMPANY;
                         // TODO: 2018/4/27  客户表  查询managerUuid
                         accountManager = accountDao.findOneBySysType(searchManager);
-                        if(accountManager!=null){
+                        if (accountManager != null) {
                             managerUuid = accountManager.account_uuid;
                         }
                         isBind = true;
@@ -101,22 +101,23 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_AGENT:
 
                         AccountDefault accountDefault = accountDao.findAccountDefault(account.account_uuid);
-                        if(accountDefault!=null){
-                            if(isValidAgent(accountDefault.manager_uuid,account.phone,account.user_id)>0){
+                        if (accountDefault != null) {
+                            if (isValidAgent(accountDefault.manager_uuid, account.phone, account.user_id) > 0) {
                                 isBind = true;
                                 managerUuid = accountDefault.manager_uuid;
                                 accountManager = accountDao.findByUuid(managerUuid);
                             }
                         }
-                        if(!isBind){
+                        //未绑定
+                        if (!isBind) {
 
                             List<Account> list = getExistsManagerUuid(account.phone, system.id);
-                            if(list.size()==1){
+                            if (list.size() == 1) {
                                 managerUuid = list.get(0).account_uuid;
                                 accountManager = list.get(0);
 //                        }else if(list.size()>1){
 //                            tokenData.needManager = 1;
-                            }else{
+                            } else {
                                 needManage = true;
                             }
                         }
@@ -125,11 +126,11 @@ public class AccountAction extends BaseAction {
 
                 String token = null;
                 long timeMillis = TimeKit.currentTimeMillis();
-                account.token = getLoginToken(account.account_uuid,accountType,managerUuid,system.id,account.salt);
+                account.token = getLoginToken(account.account_uuid, accountType, managerUuid, system.id, account.salt);
                 account.updated_at = timeMillis;
-                if(accountDao.updateTokenByUuid(account)>0){
+                if (accountDao.updateTokenByUuid(account) > 0) {
                     token = account.token;
-                    if(!isBind){
+                    if (!isBind) {
 
 //                        if(accountManager!=null){
 //                            CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
@@ -140,45 +141,46 @@ public class AccountAction extends BaseAction {
 //
 //                        }
 
-                        if(!needManage){
-                            bindAgent(account.account_uuid,account.phone,managerUuid,account.user_id);
+                        if (!needManage) {
+                            int bindFlag = bindAgent(account.account_uuid, account.phone, managerUuid, account.user_id);
+                            needManage = bindFlag==0;
                         }
                     }
                 }
 
-                if(!StringKit.isEmpty(token)){
+                if (!StringKit.isEmpty(token)) {
                     response.data = tokenData;
                     response.data.token = token;
-                    if(needManage){
-                        return json( BaseResponse.CODE_NEED_CHOOSE_MANAGER,"请选择业管", response);
-                    }else{
-                        return json( BaseResponse.CODE_SUCCESS,"登录成功", response);
+                    if (needManage) {
+                        return json(BaseResponse.CODE_NEED_CHOOSE_MANAGER, "请选择业管", response);
+                    } else {
+                        return json(BaseResponse.CODE_SUCCESS, "登录成功", response);
                     }
-                }else{
-                    return json(BaseResponse.CODE_FAILURE,"请输入正确的用户名或密码", response);
+                } else {
+                    return json(BaseResponse.CODE_FAILURE, "请输入正确的用户名或密码", response);
                 }
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"账号异常，请联系管理员", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "账号异常，请联系管理员", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的用户名或密码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的用户名或密码", response);
         }
     }
 
-    public String registry(ActionBean bean,String requestAccountType){
+    public String registry(ActionBean bean, String requestAccountType) {
         RegistryRequest request = requst2Bean(bean.body, RegistryRequest.class);
         RegistryResponse response = new RegistryResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         int accountType = Account.getAccountType(requestAccountType);
 
         PlatformSystem system = _getChannelSystem(bean.domain);
-        if(system==null || system.status != PlatformSystem.STATUS_OK){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (system == null || system.status != PlatformSystem.STATUS_OK) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 
         Account searchAManager = new Account();
@@ -186,35 +188,36 @@ public class AccountAction extends BaseAction {
         searchAManager.user_type = Account.TYPE_COMPANY;
         Account accountManager = accountDao.findOneBySysType(searchAManager);
 
-        if(accountManager==null){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (accountManager == null) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
         int accountFiled = Account.getAccountFiled(request.method);
         boolean checkOk = false;
-        switch (accountFiled){
+        switch (accountFiled) {
             case Account.ACCOUNT_FILED_USERNAME:
                 checkOk = false;
                 break;
             case Account.ACCOUNT_FILED_EMAIL:
-                checkOk = checkToken!=null && "mail".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
+                checkOk = checkToken != null && "mail".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
                 break;
             case Account.ACCOUNT_FILED_PHONE:
-                checkOk = checkToken!=null && "sms".equals(checkToken.method) && request.username.equals(checkToken.verifyName);;
+                checkOk = checkToken != null && "sms".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
+                ;
                 break;
         }
 
-        if(checkOk){
+        if (checkOk) {
 
             String password = request.password;
             String salt = StringKit.randStr(6);
             boolean accountNameExsitFlag = false;
             String errMsg = null;
 
-            Account account = accountDao.findByAccount(system.id,request.username, accountType, accountFiled);
+            Account account = accountDao.findByAccount(system.id, request.username, accountType, accountFiled);
 
-            if(account!=null){
+            if (account != null) {
                 errMsg = "用户已存在";
                 accountNameExsitFlag = true;
             }
@@ -223,9 +226,9 @@ public class AccountAction extends BaseAction {
             int resultAdd = 0;
             int custType = 0;
             String accountUuid = String.valueOf(AccountUuidWorker.getWorker(1, 1).nextId());
-            if(!accountNameExsitFlag){
+            if (!accountNameExsitFlag) {
                 String userId = null;
-                switch (accountType){
+                switch (accountType) {
                     case Account.TYPE_CUST_USER: {
                         PersonBean personBean = new PersonBean();
                         personBean.phone = request.username;
@@ -239,15 +242,14 @@ public class AccountAction extends BaseAction {
                     case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
                         companyBean.email = request.username;
-                        long resultId = companyClient.addCompany(companyBean,accountUuid);
+                        long resultId = companyClient.addCompany(companyBean, accountUuid);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
                         custType = CustomerBean.TYPE_CUST_COM;
                         break;
                     }
-                    case Account.TYPE_AGENT:
-                    {
+                    case Account.TYPE_AGENT: {
                         PersonBean personBean = new PersonBean();
                         personBean.phone = request.username;
 
@@ -255,20 +257,20 @@ public class AccountAction extends BaseAction {
 
                         resultId = personClient.saveInfo(personBean);
 
-                        if(resultId>0){
+                        if (resultId > 0) {
                             userId = String.valueOf(resultId);
                         }
                         break;
                     }
 
                 }
-                if(userId!=null){
+                if (userId != null) {
                     Account addRecord = new Account();
                     // uuID
                     addRecord.account_uuid = accountUuid;
                     addRecord.status = Account.STATUS_NORMAL;
-                    addRecord.password = Account.generatePwd(password,salt);
-                    switch (accountFiled){
+                    addRecord.password = Account.generatePwd(password, salt);
+                    switch (accountFiled) {
                         case Account.ACCOUNT_FILED_USERNAME:
                             addRecord.username = request.username;
                             break;
@@ -287,11 +289,11 @@ public class AccountAction extends BaseAction {
                     addRecord.sys_id = system.id;
                     resultAdd = accountDao.registry(addRecord);
 
-                    if(resultAdd>0){
-                        if(custType==1 || custType==2){
+                    if (resultAdd > 0) {
+                        if (custType == 1 || custType == 2) {
 
                             CustomerBean customerBean = new CustomerBean();
-                            customerBean.type=custType;
+                            customerBean.type = custType;
                             customerBean.customerId = Integer.valueOf(userId);
                             customerBean.accountUuid = addRecord.account_uuid;
                             customerBean.managerUuid = accountManager.account_uuid;
@@ -301,69 +303,69 @@ public class AccountAction extends BaseAction {
                 }
             }
 
-            if(resultAdd>0){
+            if (resultAdd > 0) {
                 response.data = new RegistrySuccessData();
                 response.data.usernameTxt = request.username;
                 response.data.passwordTxt = request.password;
-                return json(BaseResponse.CODE_SUCCESS,"注册成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"注册失败":errMsg, response);
+                return json(BaseResponse.CODE_SUCCESS, "注册成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, StringKit.isEmpty(errMsg) ? "注册失败" : errMsg, response);
             }
 
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的验证码", response);
         }
 
     }
 
-    public String resetPassword(ActionBean bean){
+    public String resetPassword(ActionBean bean) {
         ResetPasswordRequest request = requst2Bean(bean.body, ResetPasswordRequest.class);
         ResetPasswordResponse response = new ResetPasswordResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         int accountType = bean.type;
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
 
-        if (checkToken!=null) {
+        if (checkToken != null) {
             Account updateRecord = new Account();
             String salt = StringKit.randStr(6);
-            updateRecord.account_uuid=bean.accountUuid;
+            updateRecord.account_uuid = bean.accountUuid;
             updateRecord.salt = salt;
-            updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.accountUuid, accountType,bean.managerUuid,bean.sysId,salt);
+            updateRecord.password = Account.generatePwd(request.password, salt);
+            String token = getLoginToken(bean.accountUuid, accountType, bean.managerUuid, bean.sysId, salt);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
-            if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
+            if (accountDao.updatePasswordTokenByUuid(updateRecord) > 0) {
                 response.data = new TokenData();
                 response.data.token = token;
-                return json(BaseResponse.CODE_SUCCESS,"重设密码成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"重设密码失败", response);
+                return json(BaseResponse.CODE_SUCCESS, "重设密码成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "重设密码失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的验证码", response);
         }
     }
 
-    public String forgetPassword(ActionBean bean,String requestAccountType){
+    public String forgetPassword(ActionBean bean, String requestAccountType) {
         ForgetPasswordRequest request = requst2Bean(bean.body, ForgetPasswordRequest.class);
         BaseResponse response = new ResetPasswordResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         int accountType = Account.getAccountType(requestAccountType);
 
         PlatformSystem system = _getChannelSystem(bean.domain);
-        if(system==null || system.status != PlatformSystem.STATUS_OK){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (system == null || system.status != PlatformSystem.STATUS_OK) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 //        Account searchSystem = new Account();
 //        searchSystem.sys_id = system.id;
@@ -376,52 +378,52 @@ public class AccountAction extends BaseAction {
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
 
-        if (checkToken!=null) {
+        if (checkToken != null) {
             Account account;
-            if("sms".equals(checkToken.method)){
-                account = accountDao.findByAccount(system.id,checkToken.verifyName, accountType, Account.ACCOUNT_FILED_PHONE);
-            }else{
-                account = accountDao.findByAccount(system.id,checkToken.verifyName, accountType, Account.ACCOUNT_FILED_EMAIL);
+            if ("sms".equals(checkToken.method)) {
+                account = accountDao.findByAccount(system.id, checkToken.verifyName, accountType, Account.ACCOUNT_FILED_PHONE);
+            } else {
+                account = accountDao.findByAccount(system.id, checkToken.verifyName, accountType, Account.ACCOUNT_FILED_EMAIL);
             }
-            if(account==null){
+            if (account == null) {
 
-                return json(BaseResponse.CODE_FAILURE,"手机号未注册", response);
+                return json(BaseResponse.CODE_FAILURE, "手机号未注册", response);
             }
             String managerUuid = null;
-            if(accountType==Account.TYPE_COMPANY){
+            if (accountType == Account.TYPE_COMPANY) {
                 managerUuid = account.account_uuid;
             }
             Account updateRecord = new Account();
             String salt = StringKit.randStr(6);
-            updateRecord.account_uuid=account.account_uuid;
+            updateRecord.account_uuid = account.account_uuid;
             updateRecord.salt = salt;
-            updateRecord.password = Account.generatePwd(request.password,salt);
-            String token = getLoginToken(bean.accountUuid, accountType,managerUuid,system.id,salt);
+            updateRecord.password = Account.generatePwd(request.password, salt);
+            String token = getLoginToken(bean.accountUuid, accountType, managerUuid, system.id, salt);
             updateRecord.token = token;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
-            if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
-                return json(BaseResponse.CODE_SUCCESS,"重设密码成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"重设密码失败", response);
+            if (accountDao.updatePasswordTokenByUuid(updateRecord) > 0) {
+                return json(BaseResponse.CODE_SUCCESS, "重设密码成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "重设密码失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的验证码", response);
         }
     }
 
-    public String sendCode(ActionBean bean,String requestAccountType){
+    public String sendCode(ActionBean bean, String requestAccountType) {
         GetCodeRequest request = requst2Bean(bean.body, GetCodeRequest.class);
         GetCodeResponse response = new GetCodeResponse();
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         int accountType = Account.getAccountType(requestAccountType);
 
         PlatformSystem system = _getChannelSystem(bean.domain);
-        if(system==null || system.status != PlatformSystem.STATUS_OK){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (system == null || system.status != PlatformSystem.STATUS_OK) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 
 
@@ -430,55 +432,55 @@ public class AccountAction extends BaseAction {
         String errMsg = null;
         int verifyType = 0;
         String verifyName = null;
-        if("sms".equals(method)){
+        if ("sms".equals(method)) {
             flag = StringKit.isMobileNO(request.phone);
-            if(flag){
+            if (flag) {
                 verifyName = request.phone;
                 verifyType = AccountVerify.VERIFY_TYPE_PHONE;
-            }else{
+            } else {
                 errMsg = "请输入正确的手机号";
             }
-        }else if("mail".equals(method)){
+        } else if ("mail".equals(method)) {
             flag = StringKit.isEmail(request.email);
-            if(flag){
+            if (flag) {
                 verifyName = request.email;
                 verifyType = AccountVerify.VERIFY_TYPE_EMAIL;
-            }else{
+            } else {
                 errMsg = "请输入正确的邮箱地址";
             }
         }
 
-        if(flag){
+        if (flag) {
             errMsg = _toSendCode(verifyName, accountType, verifyType, system.id);
-            if(errMsg==null){
+            if (errMsg == null) {
                 flag = true;
             }
         }
 
-        if(flag){
-            return json(BaseResponse.CODE_SUCCESS,"验证码已发送", response);
-        }else{
-            return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"验证码发送失败":errMsg, response);
+        if (flag) {
+            return json(BaseResponse.CODE_SUCCESS, "验证码已发送", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, StringKit.isEmpty(errMsg) ? "验证码发送失败" : errMsg, response);
         }
     }
 
 
-    public String checkSendCode(ActionBean bean,String requestAccountType){
+    public String checkSendCode(ActionBean bean, String requestAccountType) {
 
-        CheckCodeRequest request = requst2Bean(bean.body,CheckCodeRequest.class);
+        CheckCodeRequest request = requst2Bean(bean.body, CheckCodeRequest.class);
         CheckCodeResponse response = new CheckCodeResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
 
         int accountType = Account.getAccountType(requestAccountType);
 
         PlatformSystem system = _getChannelSystem(bean.domain);
-        if(system==null || system.status != PlatformSystem.STATUS_OK){
-            return json(BaseResponse.CODE_FAILURE,"系统未上线，请联系管理员", response);
+        if (system == null || system.status != PlatformSystem.STATUS_OK) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
 
         String method = request.method;
@@ -486,53 +488,53 @@ public class AccountAction extends BaseAction {
         String errMsg = null;
         int verifyType = 0;
         String verifyName = null;
-        if("sms".equals(method)){
+        if ("sms".equals(method)) {
             flag = StringKit.isMobileNO(request.phone);
-            if(flag){
+            if (flag) {
                 verifyName = request.phone;
                 verifyType = AccountVerify.VERIFY_TYPE_PHONE;
-            }else{
+            } else {
                 errMsg = "请输入正确的手机号";
             }
-        }else if("mail".equals(method)){
+        } else if ("mail".equals(method)) {
             flag = StringKit.isEmail(request.email);
-            if(flag){
+            if (flag) {
                 verifyName = request.email;
                 verifyType = AccountVerify.VERIFY_TYPE_EMAIL;
-            }else{
+            } else {
                 errMsg = "请输入正确的邮箱地址";
             }
         }
 
-        if(flag){
-            if(_checkCode(verifyName, request.code,accountType,  system.id)){
+        if (flag) {
+            if (_checkCode(verifyName, request.code, accountType, system.id)) {
                 String checkToken = generateCheckToken(verifyName, request.method);
                 response.data = new VerifyTokenData();
                 response.data.verifyToken = checkToken;
-                return json(BaseResponse.CODE_SUCCESS,"验证码发送成功", response);
+                return json(BaseResponse.CODE_SUCCESS, "验证码发送成功", response);
             }
         }
-        return json(BaseResponse.CODE_FAILURE,StringKit.isEmpty(errMsg)?"请输入正确的验证码":errMsg, response);
+        return json(BaseResponse.CODE_FAILURE, StringKit.isEmpty(errMsg) ? "请输入正确的验证码" : errMsg, response);
     }
 
-    public String listManager(ActionBean bean){
-        ListManagerRequest request = requst2Bean(bean.body,ListManagerRequest.class);
+    public String listManager(ActionBean bean) {
+        ListManagerRequest request = requst2Bean(bean.body, ListManagerRequest.class);
         ListManagerResponse response = new ListManagerResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         List<ManagerData> list = new ArrayList<>();
 
         Account account = accountDao.findByUuid(bean.accountUuid);
-        if(account!=null){
+        if (account != null) {
 
             List<Account> listManager = getExistsManagerUuid(account.phone, bean.sysId);
             for (Account at : listManager) {
                 CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(at.user_id));
-                if(companyBean!=null){
+                if (companyBean != null) {
                     ManagerData managerData = new ManagerData();
                     managerData.managerName = companyBean.name;
                     managerData.managerUuid = at.account_uuid;
@@ -540,39 +542,39 @@ public class AccountAction extends BaseAction {
                 }
             }
         }
-        if(list.isEmpty()){
-            return json(BaseResponse.CODE_AGENT_ACCOUNT_INVALID,"很抱歉，您的账号尚未生效，请联系业管处理", response);
-        }else{
+        if (list.isEmpty()) {
+            return json(BaseResponse.CODE_AGENT_ACCOUNT_INVALID, "很抱歉，您的账号尚未生效，请联系业管处理", response);
+        } else {
             response.data = list;
-            return json(BaseResponse.CODE_SUCCESS,"获取成功", response);
+            return json(BaseResponse.CODE_SUCCESS, "获取成功", response);
         }
     }
 
-    public String chooseManager(ActionBean bean){
-        ChooseManagerRequest request = requst2Bean(bean.body,ChooseManagerRequest.class);
+    public String chooseManager(ActionBean bean) {
+        ChooseManagerRequest request = requst2Bean(bean.body, ChooseManagerRequest.class);
         ChooseManagerResponse response = new ChooseManagerResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
         boolean isValid = false;
         Account accountU = accountDao.findByUuid(bean.accountUuid);
         Account accountManager = null;
-        if(accountU!=null){
+        if (accountU != null) {
             List<Account> listManager = getExistsManagerUuid(accountU.phone, bean.sysId);
-            if(listManager!=null){
+            if (listManager != null) {
                 Map<String, Account> accountMap = ListKit.toMap(listManager, v -> v.account_uuid);
-                if(accountMap.containsKey(request.managerUuid)){
+                if (accountMap.containsKey(request.managerUuid)) {
                     accountManager = accountMap.get(request.managerUuid);
-                    if(accountU.user_type==Account.TYPE_AGENT){
+                    if (accountU.user_type == Account.TYPE_AGENT) {
                         int validAgent = isValidAgent(accountU.phone, request.managerUuid, accountU.user_id);
-                        if(validAgent==-1){
-                            return json(BaseResponse.CODE_FAILURE,"不能选择已离职的业管", response);
-                        }else{
-                            isValid = validAgent>0;
+                        if (validAgent == -1) {
+                            return json(BaseResponse.CODE_FAILURE, "不能选择已离职的业管", response);
+                        } else {
+                            isValid = validAgent > 0;
                         }
-                    }else{
+                    } else {
                         isValid = true;
                     }
                 }
@@ -580,19 +582,19 @@ public class AccountAction extends BaseAction {
 
         }
 
-        if(isValid){
+        if (isValid) {
             bean.managerUuid = request.managerUuid;
             String token = null;
             Account account = new Account();
             long timeMillis = TimeKit.currentTimeMillis();
-            account.token = getLoginToken(bean.accountUuid,bean.type,bean.managerUuid,bean.sysId,bean.salt);
+            account.token = getLoginToken(bean.accountUuid, bean.type, bean.managerUuid, bean.sysId, bean.salt);
             account.updated_at = timeMillis;
             account.account_uuid = bean.accountUuid;
-            if(accountDao.updateTokenByUuid(account)>0){
+            if (accountDao.updateTokenByUuid(account) > 0) {
                 token = account.token;
-                bindAgent(accountU.account_uuid,accountU.phone,bean.managerUuid,accountU.user_id);
+                bindAgent(accountU.account_uuid, accountU.phone, bean.managerUuid, accountU.user_id);
             }
-            if(!StringKit.isEmpty(token)){
+            if (!StringKit.isEmpty(token)) {
 
                 response.data = new TokenData();
 //                CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(accountManager.user_id));
@@ -601,148 +603,147 @@ public class AccountAction extends BaseAction {
 //                    response.data.compName = companyBean.name;
 //                }
                 response.data.token = token;
-                return json(BaseResponse.CODE_SUCCESS,"企业切换成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"企业切换失败", response);
+                return json(BaseResponse.CODE_SUCCESS, "企业切换成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "企业切换失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"企业切换失败", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "企业切换失败", response);
         }
 
     }
 
 
-    public String modifyPassword(ActionBean bean){
+    public String modifyPassword(ActionBean bean) {
         ModifyPasswordRequest request = requst2Bean(bean.body, ModifyPasswordRequest.class);
         ModifyPasswordResponse response = new ModifyPasswordResponse();
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
         int accountType = bean.type;
         Account account = accountDao.findByUuid(bean.accountUuid);
-        if(account!=null && account.password.equals(Account.generatePwd(request.oldpsword,account.salt))){
+        if (account != null && account.password.equals(Account.generatePwd(request.oldpsword, account.salt))) {
 
             String salt = StringKit.randStr(6);
             Account updateRecord = new Account();
             updateRecord.salt = salt;
-            updateRecord.password = Account.generatePwd(request.password,salt);
+            updateRecord.password = Account.generatePwd(request.password, salt);
             updateRecord.account_uuid = account.account_uuid;
             updateRecord.updated_at = TimeKit.currentTimeMillis();
-            String token = getLoginToken(account.account_uuid, accountType,bean.managerUuid,bean.sysId,salt);
+            String token = getLoginToken(account.account_uuid, accountType, bean.managerUuid, bean.sysId, salt);
             updateRecord.token = token;
 
-            if(accountDao.updatePasswordTokenByUuid(updateRecord)>0){
+            if (accountDao.updatePasswordTokenByUuid(updateRecord) > 0) {
                 response.data = new TokenData();
                 response.data.token = token;
-                return json(BaseResponse.CODE_SUCCESS,"修改密码成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"密码修改失败", response);
+                return json(BaseResponse.CODE_SUCCESS, "修改密码成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "密码修改失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"原密码错误", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "原密码错误", response);
         }
     }
 
-    public String changePhone(ActionBean bean){
-        ChangePhoneEmailRequest request = requst2Bean(bean.body,ChangePhoneEmailRequest.class);
+    public String changePhone(ActionBean bean) {
+        ChangePhoneEmailRequest request = requst2Bean(bean.body, ChangePhoneEmailRequest.class);
         BaseResponse response = new BaseResponse();
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
         CheckToken checkToken = parseCheckToken(request.verifyToken);
 
-        if(checkToken!=null){
+        if (checkToken != null) {
 
-            Account account = accountDao.findByAccount(bean.sysId,checkToken.verifyName,bean.type,Account.ACCOUNT_FILED_PHONE);
+            Account account = accountDao.findByAccount(bean.sysId, checkToken.verifyName, bean.type, Account.ACCOUNT_FILED_PHONE);
 
-            if(account!=null && !account.account_uuid.equals(bean.accountUuid)){
-                return json(BaseResponse.CODE_FAILURE,"手机号已被占用", response);
+            if (account != null && !account.account_uuid.equals(bean.accountUuid)) {
+                return json(BaseResponse.CODE_FAILURE, "手机号已被占用", response);
             }
 
             Account updateRecord = new Account();
             updateRecord.phone = checkToken.verifyName;
-            updateRecord.updated_at=TimeKit.currentTimeMillis();
+            updateRecord.updated_at = TimeKit.currentTimeMillis();
             updateRecord.account_uuid = bean.accountUuid;
-            if(accountDao.updatePhoneByUuid(updateRecord)>0){
+            if (accountDao.updatePhoneByUuid(updateRecord) > 0) {
                 // TODO: 2018/4/20 change 联系人
-                return json(BaseResponse.CODE_SUCCESS,"更换手机号成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"更换手机号失败", response);
+                return json(BaseResponse.CODE_SUCCESS, "更换手机号成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "更换手机号失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的验证码", response);
         }
     }
 
-    public String changeEmail(ActionBean bean){
-        ChangePhoneEmailRequest request = requst2Bean(bean.body,ChangePhoneEmailRequest.class);
+    public String changeEmail(ActionBean bean) {
+        ChangePhoneEmailRequest request = requst2Bean(bean.body, ChangePhoneEmailRequest.class);
         BaseResponse response = new BaseResponse();
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
 
         CheckToken checkToken = parseCheckToken(request.verifyToken);
-        if(checkToken!=null){
-            Account account = accountDao.findByAccount(bean.sysId,checkToken.verifyName,bean.type,Account.ACCOUNT_FILED_EMAIL);
+        if (checkToken != null) {
+            Account account = accountDao.findByAccount(bean.sysId, checkToken.verifyName, bean.type, Account.ACCOUNT_FILED_EMAIL);
 
-            if(account!=null && !account.account_uuid.equals(bean.accountUuid)){
-                return json(BaseResponse.CODE_FAILURE,"邮箱地址已被占用", response);
+            if (account != null && !account.account_uuid.equals(bean.accountUuid)) {
+                return json(BaseResponse.CODE_FAILURE, "邮箱地址已被占用", response);
             }
             Account updateRecord = new Account();
             updateRecord.email = checkToken.verifyName;
-            updateRecord.updated_at=TimeKit.currentTimeMillis();
+            updateRecord.updated_at = TimeKit.currentTimeMillis();
             updateRecord.account_uuid = bean.accountUuid;
-            if(accountDao.updateEmailByUuid(updateRecord)>0){
-                return json(BaseResponse.CODE_SUCCESS,"更换邮箱地址成功", response);
-            }else{
-                return json(BaseResponse.CODE_FAILURE,"更换邮箱地址失败", response);
+            if (accountDao.updateEmailByUuid(updateRecord) > 0) {
+                return json(BaseResponse.CODE_SUCCESS, "更换邮箱地址成功", response);
+            } else {
+                return json(BaseResponse.CODE_FAILURE, "更换邮箱地址失败", response);
             }
-        }else{
-            return json(BaseResponse.CODE_FAILURE,"请输入正确的验证码", response);
+        } else {
+            return json(BaseResponse.CODE_FAILURE, "请输入正确的验证码", response);
         }
     }
 
-    public String loginOut(ActionBean bean){
+    public String loginOut(ActionBean bean) {
         BaseResponse response = new BaseResponse();
-        return json(BaseResponse.CODE_SUCCESS,"成功退出", response);
+        return json(BaseResponse.CODE_SUCCESS, "成功退出", response);
     }
 
-    public String home(ActionBean bean){
+    public String home(ActionBean bean) {
         boolean hasOneManager = false;
         BaseResponse response = new BaseResponse();
         HomeData homeData = new HomeData();
-        if(!StringKit.isEmpty(bean.managerUuid)){
+        if (!StringKit.isEmpty(bean.managerUuid)) {
             Account account = accountDao.findByUuid(bean.managerUuid);
-            if(account!=null){
+            if (account != null) {
                 CompanyBean companyBean = companyClient.getCompanyById(Long.valueOf(account.user_id));
-                if(companyBean!=null){
-                    hasOneManager =true;
-                    homeData.compLogo = fileClient.getFileUrl(companyBean.head,100,100,80);
+                if (companyBean != null) {
+                    hasOneManager = true;
+                    homeData.compLogo = fileClient.getFileUrl(companyBean.head, 100, 100, 80);
                     homeData.compName = companyBean.name;
                 }
             }
         }
 
-        if(!hasOneManager){
+        if (!hasOneManager) {
             // TODO: 2018/7/4
         }
         response.data = homeData;
-        return json(BaseResponse.CODE_SUCCESS,"获取成功",response);
+        return json(BaseResponse.CODE_SUCCESS, "获取成功", response);
     }
 
-    public String jointLogin(ActionBean bean){
+    public String jointLogin(ActionBean bean) {
         BaseResponse response = new BaseResponse();
-        JointLoginRequest request = requst2Bean(bean.body,JointLoginRequest.class);
+        JointLoginRequest request = requst2Bean(bean.body, JointLoginRequest.class);
 
         ResponseMessage errMessage = checkParam(request);
-        if(errMessage.hasError()){
-            return json(BaseResponse.CODE_FAILURE,errMessage, response);
+        if (errMessage.hasError()) {
+            return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
-
 
 
         HomeData homeData = new HomeData();
@@ -752,7 +753,7 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private String getLoginToken(String uuid,int accountType,String sysUuid,long sysId,String salt){
+    private String getLoginToken(String uuid, int accountType, String sysUuid, long sysId, String salt) {
         ActionBean loginAction = new ActionBean();
         loginAction.accountUuid = uuid;
         loginAction.managerUuid = sysUuid;
@@ -764,32 +765,32 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private String _toSendCode(String verifyName,int accountType,int verifyType,long sysId){
+    private String _toSendCode(String verifyName, int accountType, int verifyType, long sysId) {
 
-        AccountVerify accountVerify = accountVerifyDao.findLatestByFromVerify(verifyName,accountType,sysId);
+        AccountVerify accountVerify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType, sysId);
 
         long currentTime = TimeKit.currentTimeMillis();
         String code = null;
         boolean flag = false;
         boolean needInsert = false;
         String errMsg = null;
-        if(accountVerify !=null && accountVerify.status==AccountVerify.STATUS_NOT_USE && accountVerify.code_time>currentTime){
+        if (accountVerify != null && accountVerify.status == AccountVerify.STATUS_NOT_USE && accountVerify.code_time > currentTime) {
             //存在一条未验证的短信
-            if(accountVerify.updated_at+ CODE_LIMIT_NO_RESEND_TIME > currentTime){
+            if (accountVerify.updated_at + CODE_LIMIT_NO_RESEND_TIME > currentTime) {
                 //发送间隔时间 不能小于60s
                 flag = false;
-                int extraTime = (int)(accountVerify.updated_at+ CODE_LIMIT_NO_RESEND_TIME - currentTime)/1000;
-                errMsg = extraTime+"秒后重试";
-            }else if(accountVerify.created_at+ CODE_UNIQUE_TIME >currentTime){
+                int extraTime = (int) (accountVerify.updated_at + CODE_LIMIT_NO_RESEND_TIME - currentTime) / 1000;
+                errMsg = extraTime + "秒后重试";
+            } else if (accountVerify.created_at + CODE_UNIQUE_TIME > currentTime) {
 
                 AccountVerify updateVerify = new AccountVerify();
                 updateVerify.id = accountVerify.id;
                 updateVerify.updated_at = currentTime;
                 updateVerify.code = accountVerify.code;
-                updateVerify.code_time = currentTime +CODE_VALID_TIME;
+                updateVerify.code_time = currentTime + CODE_VALID_TIME;
                 code = accountVerify.code;
-                flag = accountVerifyDao.updateCodeTime(updateVerify)>0;
-            }else{
+                flag = accountVerifyDao.updateCodeTime(updateVerify) > 0;
+            } else {
                 AccountVerify updateVerify = new AccountVerify();
                 updateVerify.id = accountVerify.id;
                 updateVerify.updated_at = currentTime;
@@ -798,11 +799,11 @@ public class AccountAction extends BaseAction {
                 accountVerifyDao.updateCodeTime(updateVerify);
                 needInsert = true;
             }
-        }else{
+        } else {
             needInsert = true;
         }
 
-        if(needInsert){
+        if (needInsert) {
 //            if(ConstantKit.IS_PRODUCT){
 //                code = StringKit.randNum(6);
 //            }else{
@@ -811,20 +812,20 @@ public class AccountAction extends BaseAction {
             code = StringKit.randNum(6);
             AccountVerify addRecord = new AccountVerify();
             addRecord.sys_id = sysId;
-            addRecord.from_type=accountType;
+            addRecord.from_type = accountType;
             addRecord.verify_name = verifyName;
             addRecord.verify_type = verifyType;
             addRecord.code = code;
-            addRecord.code_time = currentTime+CODE_VALID_TIME;
+            addRecord.code_time = currentTime + CODE_VALID_TIME;
             addRecord.status = AccountVerify.STATUS_NOT_USE;
             addRecord.created_at = currentTime;
             addRecord.updated_at = currentTime;
-            flag = accountVerifyDao.insert(addRecord)>0;
+            flag = accountVerifyDao.insert(addRecord) > 0;
         }
-        if(flag){
+        if (flag) {
             errMsg = null;
-            if(AccountVerify.VERIFY_TYPE_PHONE==verifyType){
-                if(!smsHandingClient.sendVerifyCode(verifyName,code)){
+            if (AccountVerify.VERIFY_TYPE_PHONE == verifyType) {
+                if (!smsHandingClient.sendVerifyCode(verifyName, code)) {
                     errMsg = "发送失败";
                 }
             }
@@ -833,19 +834,19 @@ public class AccountAction extends BaseAction {
 
     }
 
-    private boolean _checkCode(String verifyName,String code,int accountType,long sysId){
+    private boolean _checkCode(String verifyName, String code, int accountType, long sysId) {
         boolean verifyFlag = false;
-        if(!StringKit.isEmpty(verifyName)) {
+        if (!StringKit.isEmpty(verifyName)) {
             long currentTime = TimeKit.currentTimeMillis();
-            AccountVerify verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType,sysId);
+            AccountVerify verify = accountVerifyDao.findLatestByFromVerify(verifyName, accountType, sysId);
 
             if (verify != null && verify.status == AccountVerify.STATUS_NOT_USE && currentTime < verify.code_time) {
                 verifyFlag = verify.code.equals(code);
-                if(verifyFlag){
+                if (verifyFlag) {
                     AccountVerify updateUsed = new AccountVerify();
                     updateUsed.updated_at = currentTime;
                     updateUsed.status = AccountVerify.STATUS_USED;
-                    updateUsed.id= verify.id;
+                    updateUsed.id = verify.id;
                     accountVerifyDao.updateStatus(updateUsed);
                 }
             }
@@ -854,14 +855,14 @@ public class AccountAction extends BaseAction {
         return verifyFlag;
     }
 
-    private PlatformSystem _getChannelSystem(String referer){
-        if(ConstantKit.IS_PRODUCT){
+    private PlatformSystem _getChannelSystem(String referer) {
+        if (ConstantKit.IS_PRODUCT) {
             String[] domains = StringKit.parseDomain(referer);
-            if(domains!=null){
+            if (domains != null) {
                 String domain = domains[0];
-                return  platformSystemDao.findDomain(domain);
+                return platformSystemDao.findDomain(domain);
             }
-        }else{
+        } else {
             PlatformSystem system = new PlatformSystem();
             system.id = 1;
             system.status = PlatformSystem.STATUS_OK;
@@ -873,7 +874,7 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private String generateCheckToken(String verifyName,String method){
+    private String generateCheckToken(String verifyName, String method) {
         CheckToken checkToken = new CheckToken();
         checkToken.method = method;
         checkToken.verifyName = verifyName;
@@ -881,15 +882,15 @@ public class AccountAction extends BaseAction {
         return new RC4Kit("checkToken-inshcos").encry_RC4_hex(JsonKit.bean2Json(checkToken));
     }
 
-    private CheckToken parseCheckToken(String checkToken){
-        CheckToken bean = JsonKit.json2Bean(new RC4Kit("checkToken-inshcos").decry_RC4_hex(checkToken),CheckToken.class);
-        if(bean==null || StringKit.isEmpty(bean.verifyName) || StringKit.isEmpty(bean.method)){
+    private CheckToken parseCheckToken(String checkToken) {
+        CheckToken bean = JsonKit.json2Bean(new RC4Kit("checkToken-inshcos").decry_RC4_hex(checkToken), CheckToken.class);
+        if (bean == null || StringKit.isEmpty(bean.verifyName) || StringKit.isEmpty(bean.method)) {
             return null;
         }
         return bean;
     }
 
-    private static class CheckToken{
+    private static class CheckToken {
 
         public long time;
 
@@ -899,7 +900,7 @@ public class AccountAction extends BaseAction {
 
     }
 
-    private List<Account> getExistsManagerUuid(String phone,long sysId){
+    private List<Account> getExistsManagerUuid(String phone, long sysId) {
         Account searchManagers = new Account();
         searchManagers.sys_id = sysId;
         searchManagers.user_type = Account.TYPE_COMPANY;
@@ -907,13 +908,13 @@ public class AccountAction extends BaseAction {
 
         List<Account> exists = new ArrayList<>();
 
-        if(accounts!=null){
+        if (accounts != null) {
             List<String> columnList = ListKit.toColumnList(accounts, v -> v.account_uuid);
             List<AgentJobBean> beanList = agentJobClient.getInviteAgents(phone, columnList);
-            if(beanList!=null && !beanList.isEmpty()){
+            if (beanList != null && !beanList.isEmpty()) {
                 List<String> columnList1 = ListKit.toColumnList(beanList, v -> v.manager_uuid);
                 for (Account account : accounts) {
-                    if(columnList1.contains(account.account_uuid)){
+                    if (columnList1.contains(account.account_uuid)) {
                         exists.add(account);
                     }
                 }
@@ -923,38 +924,36 @@ public class AccountAction extends BaseAction {
     }
 
 
-    private int bindAgent(String accountUuid,String phone,String managerUuid,String userId){
+    private int bindAgent(String accountUuid, String phone, String managerUuid, String userId) {
 
         AccountDefault aDefault = new AccountDefault();
         aDefault.account_uuid = accountUuid;
         aDefault.manager_uuid = managerUuid;
         aDefault.updated_at = TimeKit.currentTimeMillis();
-        if(agentJobClient.bindPerson(phone,managerUuid,Long.valueOf(userId))>0){
-            accountDao.addOrUpdate(aDefault);
+        if (agentJobClient.bindPerson(phone, managerUuid, Long.valueOf(userId)) > 0) {
+            return accountDao.addOrUpdate(aDefault);
+        }else{
+            return 0;
         }
-        return 1;
+
     }
 
-    private int isValidAgent(String managerUuid,String phone,String userId){
+    private int isValidAgent(String managerUuid, String phone, String userId) {
         int flag = 0;
         AgentJobBean agentJobBean = agentJobClient.getAgentInfoInAndOut(managerUuid, phone);
-        if(agentJobBean!=null ){
-            if(agentJobBean.out_time<TimeKit.currentTimeMillis()){
+        if (agentJobBean != null) {
+            if (agentJobBean.out_time < TimeKit.currentTimeMillis()) {
                 flag = -1;
-                if(agentJobBean.bind_status == 1){
-                    agentJobClient.unBindPerson(phone,managerUuid,Long.valueOf(userId));
+                if (agentJobBean.bind_status == 1) {
+                    agentJobClient.unBindPerson(phone, managerUuid, Long.valueOf(userId));
                 }
-            }else{
-                flag = 1;
+            } else {
+                flag = agentJobBean.bind_status;
             }
 
         }
         return flag;
     }
-
-
-
-
 
 
 }
