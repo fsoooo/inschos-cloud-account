@@ -13,4 +13,6 @@ public interface PlatformSystemMapper {
 
     PlatformSystem findDomain(String domain);
 
+    PlatformSystem findCode(String code);
+
 }

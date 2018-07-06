@@ -33,4 +33,14 @@
         where find_in_set(#{domain},`domain`) and `state`=1 and status=1
     </select>
 
+    <select id="findCode" parameterType="java.lang.String" resultType="PlatformSystem">
+        select
+        <include refid="Base_Column_List"/>
+        from  platform_system
+        where code=#{code} and `state`=1 and status=1
+    </select>
+
+
+
+
 </mapper>

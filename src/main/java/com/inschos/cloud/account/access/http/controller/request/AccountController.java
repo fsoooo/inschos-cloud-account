@@ -76,6 +76,14 @@ public class AccountController {
     }
 
 
+    @GetActionBeanAnnotation(isCheckAccess = false)
+    @RequestMapping("/jointLogin")
+    @ResponseBody
+    public String jointLogin(ActionBean bean){
+        return  accountAction.jointLogin(bean);
+    }
+
+
     @GetActionBeanAnnotation
     @RequestMapping("/chooseManager")
     @ResponseBody
@@ -127,5 +135,10 @@ public class AccountController {
     public String home(ActionBean bean){
         return  accountAction.home(bean);
     }
+
+
+
+
+
 
 }

@@ -143,7 +143,7 @@ public class AccountAction extends BaseAction {
 
                         if (!needManage) {
                             int bindFlag = bindAgent(account.account_uuid, account.phone, managerUuid, account.user_id);
-                            needManage = bindFlag==0;
+                            needManage = bindFlag == 0;
                         }
                     }
                 }
@@ -736,20 +736,101 @@ public class AccountAction extends BaseAction {
         return json(BaseResponse.CODE_SUCCESS, "获取成功", response);
     }
 
+    /**
+     * 联合登录
+     */
     public String jointLogin(ActionBean bean) {
-        BaseResponse response = new BaseResponse();
+
         JointLoginRequest request = requst2Bean(bean.body, JointLoginRequest.class);
+
+        LoginResponse response = new LoginResponse();
 
         ResponseMessage errMessage = checkParam(request);
         if (errMessage.hasError()) {
             return json(BaseResponse.CODE_FAILURE, errMessage, response);
         }
+        PlatformSystem system = platformSystemDao.findCode(request.platform);
+
+        if (system == null) {
+            return json(BaseResponse.CODE_FAILURE, "平台[" + request.platform + "]暂不支持联合登录", response);
+        }
 
 
-        HomeData homeData = new HomeData();
+        Account searchAManager = new Account();
+        searchAManager.sys_id = system.id;
+        searchAManager.user_type = Account.TYPE_COMPANY;
+        Account accountManager = accountDao.findOneBySysType(searchAManager);
+
+        if (accountManager == null) {
+            return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
+        }
+
+        Account account = new Account();
+        boolean needAdd = false;
+        switch (request.platform) {
+            case "YUNDA":
+                if (!StringKit.isMobileNO(request.phone)) {
+                    return json(BaseResponse.CODE_FAILURE, "手机号错误", response);
+                }
+                Account accountExists = accountDao.findByAccount(system.id, request.phone, Account.TYPE_CUST_USER, Account.ACCOUNT_FILED_PHONE);
+                if (accountExists == null) {
+                    account.phone = request.phone;
+                    account.user_type = Account.TYPE_CUST_USER;
+                    needAdd = true;
+                } else {
+                    account = accountExists;
+                }
+
+                break;
+            default:
+                break;
+        }
+
+        boolean isLogin = false;
+
+        if (needAdd) {
+
+            PersonBean addPerson = new PersonBean();
+            addPerson.name = request.name;
+            addPerson.phone = request.phone;
+            addPerson.email = request.email;
+            addPerson.address_detail = request.address;
+//            addPerson.address = request.area;
+            // TODO: 2018/7/5 省市县
+            addPerson.cert_code = request.certCode;
+            if (StringKit.isInteger(request.certType)) {
+                addPerson.cert_type = Integer.valueOf(request.certType);
+            }
+            int userId = personClient.saveInfo(addPerson);
+            if(userId>0){
+                String accountUuid = String.valueOf(AccountUuidWorker.getWorker(1, 1).nextId());
+                String salt = StringKit.randStr(6);
+                account.account_uuid = accountUuid;
+                account.status = Account.STATUS_NORMAL;
+                account.password = Account.generatePwd("", salt);
+                account.salt = salt;
+                account.token = getLoginToken(account.account_uuid, account.user_type, accountManager.account_uuid, account.sys_id, account.salt);
+                account.user_id = String.valueOf(userId);
+                account.sys_id = system.id;
+                account.state = Common.STATE_ONLINE;
+                account.created_at = account.updated_at = TimeKit.currentTimeMillis();
+                isLogin = accountDao.registry(account)>0;
+            }
 
 
-        return null;
+        } else {
+            account.token = getLoginToken(account.account_uuid, account.user_type, accountManager.account_uuid, account.sys_id, account.salt);
+            account.updated_at = TimeKit.currentTimeMillis();
+            isLogin = accountDao.updateTokenByUuid(account)>0;
+        }
+
+        if(isLogin){
+            response.data = new TokenData();
+            response.data.token = account.token;
+            return json(BaseResponse.CODE_SUCCESS,"登录成功",response);
+        }else{
+            return json(BaseResponse.CODE_FAILURE,"登录失败",response);
+        }
     }
 
 
@@ -932,7 +1013,7 @@ public class AccountAction extends BaseAction {
         aDefault.updated_at = TimeKit.currentTimeMillis();
         if (agentJobClient.bindPerson(phone, managerUuid, Long.valueOf(userId)) > 0) {
             return accountDao.addOrUpdate(aDefault);
-        }else{
+        } else {
             return 0;
         }
 

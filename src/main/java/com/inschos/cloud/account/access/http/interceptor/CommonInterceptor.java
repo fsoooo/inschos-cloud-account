@@ -1,4 +1,4 @@
-package com.inschos.cloud.account.access.http.controller;
+package com.inschos.cloud.account.access.http.interceptor;
 
 import com.inschos.cloud.account.assist.kit.L;
 import org.springframework.web.servlet.HandlerInterceptor;

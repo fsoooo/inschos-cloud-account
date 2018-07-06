@@ -19,6 +19,11 @@ public class PlatformSystemDao {
         return StringKit.isEmpty(domain)?null: platformSystemMapper.findDomain(domain);
     }
 
+    public PlatformSystem findCode(String code){
+        return StringKit.isEmpty(code)?null: platformSystemMapper.findCode(code);
+    }
+
+
     public int insert(PlatformSystem system){
 
         return system!=null? platformSystemMapper.insert(system):0;

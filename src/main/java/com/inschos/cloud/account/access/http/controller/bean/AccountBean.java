@@ -191,13 +191,20 @@ public class AccountBean {
     }
 
     public static class JointLoginRequest{
-        @ParamCheckAnnotation(name = "",isCheckEmpty = true)
-        public String channel_code;
+        @ParamCheckAnnotation(name = "平台",isCheckEmpty = true)
+        public String platform;
         public String name;
         public String phone;
+        public String certType;
+        public String certCode;
         public String email;
-        public String area;
+        public String province;
+        public String city;
+        public String district;
         public String address;
+
+
+
     }
 
     public static class TokenData {

@@ -42,7 +42,7 @@
             <!-- 排除拦截 -->
             <!--<mvc:exclude-mapping path="/" />-->
 
-            <bean class="com.inschos.cloud.account.access.http.controller.CommonInterceptor">
+            <bean class="com.inschos.cloud.account.access.http.interceptor.CommonInterceptor">
                 <!-- 排除拦截 -->
                 <property name="excludedUrls">
                     <list>
