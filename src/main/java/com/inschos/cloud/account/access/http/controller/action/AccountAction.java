@@ -4,10 +4,7 @@ import com.inschos.cloud.account.access.http.controller.bean.AccountBean.*;
 import com.inschos.cloud.account.access.http.controller.bean.ActionBean;
 import com.inschos.cloud.account.access.http.controller.bean.BaseResponse;
 import com.inschos.cloud.account.access.http.controller.bean.ResponseMessage;
-import com.inschos.cloud.account.access.rpc.bean.AgentJobBean;
-import com.inschos.cloud.account.access.rpc.bean.CompanyBean;
-import com.inschos.cloud.account.access.rpc.bean.CustomerBean;
-import com.inschos.cloud.account.access.rpc.bean.PersonBean;
+import com.inschos.cloud.account.access.rpc.bean.*;
 import com.inschos.cloud.account.access.rpc.client.*;
 import com.inschos.cloud.account.assist.kit.*;
 import com.inschos.cloud.account.data.dao.AccountDao;
@@ -46,6 +43,8 @@ public class AccountAction extends BaseAction {
     private AgentJobClient agentJobClient;
     @Autowired
     private SmsHandingClient smsHandingClient;
+    @Autowired
+    private EmailSendClient emailSendClient;
     @Autowired
     private FileClient fileClient;
 
@@ -907,6 +906,19 @@ public class AccountAction extends BaseAction {
             errMsg = null;
             if (AccountVerify.VERIFY_TYPE_PHONE == verifyType) {
                 if (!smsHandingClient.sendVerifyCode(verifyName, code)) {
+                    errMsg = "发送失败";
+                }
+            }else if(AccountVerify.VERIFY_TYPE_EMAIL == verifyType){
+                EmailInfoBean infoBean = new EmailInfoBean();
+                infoBean.bekongs = "TY";
+                infoBean.source_code = "VCODE";
+                infoBean.send_type = 1;
+                infoBean.type = 1;
+                infoBean.title = "天眼互联";
+                infoBean.html = "您的验证码是："+code+"，请于10分钟内输入，切勿泄漏他人。";
+                infoBean.to_email = new ArrayList<>();
+                infoBean.to_email.add(verifyName);
+                if(emailSendClient.send(infoBean)<=0){
                     errMsg = "发送失败";
                 }
             }
