@@ -49,7 +49,7 @@ public class CommonInterceptor implements HandlerInterceptor {
         response.setHeader("Access-Control-Allow-Methods", "*");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers",
-                "Origin, X-Ruested-With, Content-Type, Accept");
+                "Origin, X-Ruested-With, Content-Type, Accept,X-CSRF-Token");
         response.setHeader("Access-Control-Allow-Credentials","true");
         return true;
 
