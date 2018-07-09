@@ -950,9 +950,8 @@ public class AccountAction extends BaseAction {
 
     private PlatformSystem _getChannelSystem(String referer) {
         if (ConstantKit.IS_PRODUCT) {
-            String[] domains = StringKit.parseDomain(referer);
-            if (domains != null) {
-                String domain = domains[0];
+            String domain = StringKit.parseDomain(referer);
+            if (domain != null) {
                 return platformSystemDao.findDomain(domain);
             }
         } else {
