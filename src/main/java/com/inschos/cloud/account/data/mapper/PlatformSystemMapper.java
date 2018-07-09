@@ -9,7 +9,7 @@ public interface PlatformSystemMapper {
 
     int insert(PlatformSystem system);
 
-    PlatformSystem findOne(PlatformSystem system);
+    PlatformSystem findOne(long id);
 
     PlatformSystem findDomain(String domain);
 

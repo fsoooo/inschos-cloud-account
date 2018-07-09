@@ -12,6 +12,8 @@ public class PlatformSystem {
     /** 主键*/
     public long id;
 
+    public String code;
+
     /** 名称*/
     public String name;
 

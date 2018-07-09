@@ -9,7 +9,9 @@ import com.inschos.cloud.account.assist.kit.L;
 import com.inschos.cloud.account.assist.kit.StringKit;
 import com.inschos.cloud.account.assist.kit.TimeKit;
 import com.inschos.cloud.account.data.dao.AccountDao;
+import com.inschos.cloud.account.data.dao.PlatformSystemDao;
 import com.inschos.cloud.account.model.Account;
+import com.inschos.cloud.account.model.PlatformSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ public class AccountServiceImpl implements AccountService{
     private AccountDao accountDao;
     @Autowired
     private AgentJobClient agentJobClient;
+    @Autowired
+    private PlatformSystemDao platformSystemDao;
 
     @Override
     public AccountBean getAccount(String token) {
@@ -112,6 +116,11 @@ public class AccountServiceImpl implements AccountService{
         account.user_type = userType;
         account.user_id = userId;
         return toBean(accountDao.findByUser(account));
+    }
+
+    @Override
+    public PlatformSystem getSystem(long sId) {
+        return platformSystemDao.findOne(sId);
     }
 
     private AccountBean toBean(Account account){

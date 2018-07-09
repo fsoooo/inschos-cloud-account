@@ -3,23 +3,23 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.PlatformSystemMapper">
 
     <sql id="Base_Column_List">
-      `id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`
+      `id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`,`code`
     </sql>
 
     <insert id="insert" parameterType="PlatformSystem">
-        insert into platform_system(`id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`)
+        insert into platform_system(`id`,`name`,`domain`,`status`,`created_at`,`updated_at`,`state`,`code`)
         values(
-          #{id},#{name},#{domain},#{status},#{created_at},#{updated_at},#{state}
+          #{id},#{name},#{domain},#{status},#{created_at},#{updated_at},#{state},#{code}
         )
     </insert>
 
     <update id="update" parameterType="PlatformSystem">
         update platform_system set
-          `name`=#{name},`domain`=#{domain},`status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state}
+          `name`=#{name},`domain`=#{domain},`status`=#{status},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state},`code`=#{code}
         where `id`=#{id}
     </update>
 
-    <select id="findOne" parameterType="int" resultType="PlatformSystem">
+    <select id="findOne" parameterType="long" resultType="PlatformSystem">
         select
         <include refid="Base_Column_List"/>
         from  platform_system

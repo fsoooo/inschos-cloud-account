@@ -23,6 +23,9 @@ public class PlatformSystemDao {
         return StringKit.isEmpty(code)?null: platformSystemMapper.findCode(code);
     }
 
+    public PlatformSystem findOne(long sId){
+        return platformSystemMapper.findOne(sId);
+    }
 
     public int insert(PlatformSystem system){
 
