@@ -286,6 +286,7 @@ public class AccountAction extends BaseAction {
                     addRecord.state = Common.STATE_ONLINE;
                     addRecord.created_at = addRecord.updated_at = TimeKit.currentTimeMillis();
                     addRecord.sys_id = system.id;
+                    addRecord.origin = "REGISTER";
                     resultAdd = accountDao.registry(addRecord);
 
                     if (resultAdd > 0) {
@@ -767,7 +768,8 @@ public class AccountAction extends BaseAction {
         Account account = new Account();
         boolean needAdd = false;
         switch (request.platform) {
-            case "YUNDA":
+
+            default:
                 if (!StringKit.isMobileNO(request.phone)) {
                     return json(BaseResponse.CODE_FAILURE, "手机号错误", response);
                 }
@@ -779,9 +781,6 @@ public class AccountAction extends BaseAction {
                 } else {
                     account = accountExists;
                 }
-
-                break;
-            default:
                 break;
         }
 
@@ -812,6 +811,7 @@ public class AccountAction extends BaseAction {
                 account.user_id = String.valueOf(userId);
                 account.sys_id = system.id;
                 account.state = Common.STATE_ONLINE;
+                account.origin = request.origin;
                 account.created_at = account.updated_at = TimeKit.currentTimeMillis();
                 isLogin = accountDao.registry(account)>0;
             }

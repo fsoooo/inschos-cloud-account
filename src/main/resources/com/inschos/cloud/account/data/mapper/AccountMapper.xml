@@ -3,17 +3,17 @@
 <mapper namespace="com.inschos.cloud.account.data.mapper.AccountMapper">
 
     <sql id="Base_Column_List">
-        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`
+        `id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`,`origin`
     </sql>
 
     <insert id="insert" parameterType="com.inschos.cloud.account.model.Account">
-        insert into `account`(`id`,`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
-        values(#{id},#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id})
+        insert ignore into `account`( `account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`,`origin`)
+        values(#{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id},#{origin})
     </insert>
 
     <insert id="insertRegistry" parameterType="com.inschos.cloud.account.model.Account">
-        insert into account(`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`)
-        select #{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id}
+        insert ignore into account(`account_uuid`,`username`,`password`,`phone`,`email`,`token`,`status`,`user_type`,`user_id`,`created_at`,`updated_at`,`state`,`salt`,`sys_id`,`origin`)
+        select #{account_uuid},#{username},#{password},#{phone},#{email},#{token},#{status},#{user_type},#{user_id},#{created_at},#{updated_at},#{state},#{salt},#{sys_id},#{origin}
         from dual where not exists (select id from `account`
           <where>
               `sys_id`=#{sys_id} and `user_type`=#{user_type} and
@@ -35,7 +35,7 @@
     <update id="update" parameterType="com.inschos.cloud.account.model.Account">
         update account set
           `account_uuid`=#{account_uuid},`username`=#{username},`password`=#{password},`phone`=#{phone},`email`=#{email},`token`=#{token},`status`=#{status},`user_type`=#{user_type},
-          `user_id`=#{user_id},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state},`salt`=#{salt}
+          `user_id`=#{user_id},`created_at`=#{created_at},`updated_at`=#{updated_at},`state`=#{state},`salt`=#{salt},`origin`=#{origin}
         where `id`=#{id}
     </update>
 

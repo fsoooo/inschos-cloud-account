@@ -193,6 +193,8 @@ public class AccountBean {
     public static class JointLoginRequest{
         @ParamCheckAnnotation(name = "平台",isCheckEmpty = true)
         public String platform;
+        @ParamCheckAnnotation(name = "账号来源",isCheckEmpty = true)
+        public String origin;
         public String name;
         public String phone;
         public String certType;

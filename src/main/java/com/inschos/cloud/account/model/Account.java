@@ -75,6 +75,11 @@ public class Account implements Serializable{
     /** 删除标识 0删除 1可用*/
     public int state;
 
+    /**
+     * 账号来源
+     */
+    public String origin;
+
     /** 盐值 */
     public String salt;
 
