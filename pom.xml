@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.inschos</groupId>
   <artifactId>cloud-account</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0</version>
+  <packaging>war</packaging>
+  <version>1.0.0</version>
   <name>cloud-account Maven Webapp</name>
   <url>http://maven.apache.org</url>
 
@@ -170,6 +170,7 @@
   </profiles>
 
   <build>
+    <finalName>account</finalName> 
     <defaultGoal>compile</defaultGoal>
     <plugins>
       <plugin>
