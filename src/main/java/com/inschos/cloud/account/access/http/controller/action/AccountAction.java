@@ -36,6 +36,8 @@ public class AccountAction extends BaseAction {
     @Autowired
     private CompanyClient companyClient;
     @Autowired
+    private ChannelServiceClient channelServiceClient;
+    @Autowired
     private PersonClient personClient;
     @Autowired
     private CustomerClient customerClient;
@@ -196,14 +198,13 @@ public class AccountAction extends BaseAction {
         boolean checkOk = false;
         switch (accountFiled) {
             case Account.ACCOUNT_FILED_USERNAME:
-                checkOk = false;
+                checkOk = accountType==Account.TYPE_CUST_COM;
                 break;
             case Account.ACCOUNT_FILED_EMAIL:
                 checkOk = checkToken != null && "mail".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
                 break;
             case Account.ACCOUNT_FILED_PHONE:
                 checkOk = checkToken != null && "sms".equals(checkToken.method) && request.username.equals(checkToken.verifyName);
-                ;
                 break;
         }
 
@@ -240,12 +241,17 @@ public class AccountAction extends BaseAction {
                     }
                     case Account.TYPE_CUST_COM: {
                         CompanyBean companyBean = new CompanyBean();
-                        companyBean.email = request.username;
+                        if(accountFiled==Account.ACCOUNT_FILED_EMAIL){
+                            companyBean.email = request.username;
+                        }
                         long resultId = companyClient.addCompany(companyBean, accountUuid);
                         if (resultId > 0) {
                             userId = String.valueOf(resultId);
+                            channelServiceClient.addSystemDefaultChannel(accountUuid);
+
                         }
                         custType = CustomerBean.TYPE_CUST_COM;
+
                         break;
                     }
                     case Account.TYPE_AGENT: {
@@ -814,6 +820,14 @@ public class AccountAction extends BaseAction {
                 account.origin = request.origin;
                 account.created_at = account.updated_at = TimeKit.currentTimeMillis();
                 isLogin = accountDao.registry(account)>0;
+                if (isLogin){
+                    CustomerBean customerBean = new CustomerBean();
+                    customerBean.type = 1;
+                    customerBean.customerId = userId;
+                    customerBean.accountUuid = accountUuid;
+                    customerBean.managerUuid = accountManager.account_uuid;
+                    customerClient.saveCust(customerBean);
+                }
             }
 
 
@@ -826,6 +840,11 @@ public class AccountAction extends BaseAction {
         if(isLogin){
             response.data = new TokenData();
             response.data.token = account.token;
+            response.data.accountUuid = account.account_uuid;
+            response.data.managerUuid = accountManager.account_uuid;
+            response.data.userId = account.user_id;
+            response.data.userType = account.user_type;
+
             return json(BaseResponse.CODE_SUCCESS,"登录成功",response);
         }else{
             return json(BaseResponse.CODE_FAILURE,"登录失败",response);

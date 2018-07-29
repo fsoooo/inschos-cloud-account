@@ -49,6 +49,9 @@ public class AccountBean {
 
         @ParamCheckAnnotation(name = "验证",isCheckEmpty = true)
         public String verifyToken;
+        // TODO: 2018/7/29 业管开通账号时  需要填写域名
+
+        public String domain;
     }
 
 
@@ -212,6 +215,15 @@ public class AccountBean {
     public static class TokenData {
 
         public String token;
+
+        public String accountUuid;
+
+        public String managerUuid;
+
+        public String userId;
+
+        public int userType;
+
 
     }
 
