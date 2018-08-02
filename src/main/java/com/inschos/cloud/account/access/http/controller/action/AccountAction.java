@@ -763,6 +763,8 @@ public class AccountAction extends BaseAction {
 
 
         Account searchAManager = new Account();
+        L.log.info(system.id+"-id");
+        L.log.info(Account.TYPE_COMPANY+"-user_type");
         searchAManager.sys_id = system.id;
         searchAManager.user_type = Account.TYPE_COMPANY;
         Account accountManager = accountDao.findOneBySysType(searchAManager);
@@ -789,6 +791,7 @@ public class AccountAction extends BaseAction {
                 }
                 break;
         }
+        L.log.info(needAdd+"needAdd");
 
         boolean isLogin = false;
 
@@ -805,7 +808,9 @@ public class AccountAction extends BaseAction {
             if (StringKit.isInteger(request.certType)) {
                 addPerson.cert_type = Integer.valueOf(request.certType);
             }
+            L.log.info("addPerson"+JsonKit.bean2Json(addPerson));
             int userId = personClient.saveInfo(addPerson);
+            L.log.info("user_id"+userId);
             if(userId>0){
                 String accountUuid = String.valueOf(AccountUuidWorker.getWorker(1, 1).nextId());
                 String salt = StringKit.randStr(6);
@@ -819,6 +824,7 @@ public class AccountAction extends BaseAction {
                 account.state = Common.STATE_ONLINE;
                 account.origin = request.origin;
                 account.created_at = account.updated_at = TimeKit.currentTimeMillis();
+                L.log.info("accountLogin"+JsonKit.bean2Json(account));
                 isLogin = accountDao.registry(account)>0;
                 if (isLogin){
                     CustomerBean customerBean = new CustomerBean();
@@ -830,13 +836,14 @@ public class AccountAction extends BaseAction {
                 }
             }
 
-
+            L.log.info(isLogin+"login-1");
         } else {
             account.token = getLoginToken(account.account_uuid, account.user_type, accountManager.account_uuid, account.sys_id, account.salt);
             account.updated_at = TimeKit.currentTimeMillis();
             isLogin = accountDao.updateTokenByUuid(account)>0;
+            L.log.info(isLogin+"login-2");
         }
-
+        L.log.info(isLogin+"login-3");
         if(isLogin){
             response.data = new TokenData();
             response.data.token = account.token;
