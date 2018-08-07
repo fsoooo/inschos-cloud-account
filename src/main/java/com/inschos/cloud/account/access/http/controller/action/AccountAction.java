@@ -768,7 +768,7 @@ public class AccountAction extends BaseAction {
         searchAManager.sys_id = system.id;
         searchAManager.user_type = Account.TYPE_COMPANY;
         Account accountManager = accountDao.findOneBySysType(searchAManager);
-
+        L.log.info("searchAManager:"+JsonKit.bean2Json(searchAManager));
         if (accountManager == null) {
             return json(BaseResponse.CODE_FAILURE, "系统未上线，请联系管理员", response);
         }
